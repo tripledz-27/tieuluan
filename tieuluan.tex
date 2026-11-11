@@ -1,0 +1,830 @@
+% !TEX program = lualatex
+\documentclass{uetgraduation}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{calc, positioning} 
+
+\studentname{Đỗ Đình Đô, Nguyễn Chí Dũng, Đỗ Hoàng Ân}
+\title{TÌM HIỂU VỀ KIẾN TRÚC BẢO MẬT ZERO TRUST (ZTA) VÀ GIẢI PHÁP ZTNA}
+\documenttype{BÀI TẬP LỚN MÔN MẬT MÃ VÀ AN TOÀN THÔNG TIN}
+\major{Công nghệ thông tin}
+\year{2026}
+\supervisor{TS. Lê Thị Hợi}
+
+\begin{document}
+
+\makecovers
+
+% =====================================================================
+% CHƯƠNG 1: BỐI CẢNH AN TOÀN MẠNG VÀ MÔ HÌNH DỊCH CHUYỂN ZERO TRUST
+% =====================================================================
+\chapter{BỐI CẢNH AN TOÀN MẠNG VÀ MÔ HÌNH DỊCH CHUYỂN ZERO TRUST}
+\label{chap:1}
+
+% ---------------------------------------------------------------------
+% 1.1. SỰ TIẾN HÓA CỦA HẠ TẦNG MẠNG DOANH NGHIỆP HIỆN ĐẠI
+% ---------------------------------------------------------------------
+\section{Sự tiến hóa của hạ tầng mạng doanh nghiệp hiện đại}
+\label{sec:1_1}
+
+Hạ tầng Công nghệ thông tin (CNTT) của các doanh nghiệp hiện đại đang trở nên ngày càng phức tạp và phân tán. Một tổ chức ngày nay có thể đồng thời vận hành nhiều mạng nội bộ, các văn phòng chi nhánh từ xa với hạ tầng riêng biệt, kết hợp với lực lượng lao động làm việc linh hoạt từ xa và hệ thống dịch vụ đám mây đa dạng.
+
+Chính sự phức tạp này tạo ra những thách thức lớn đối với khả năng kiểm soát của các phương pháp bảo mật mạng dựa trên vành đai truyền thống (\textit{Perimeter-based Security}), bởi doanh nghiệp không còn sở hữu một ranh giới mạng vật lý duy nhất dễ dàng xác định. Hơn thế nữa, mô hình phòng thủ vành đai bộc lộ những hạn chế đáng kể: nếu kẻ tấn công vượt qua được bức tường lửa cửa ngõ, chúng có thể tiến hành di chuyển sang ngang (\textit{Lateral Movement}) trong hệ thống mạng nội bộ mà ít gặp phải rào cản hay cơ chế phát hiện chuyên sâu.
+
+Bối cảnh này đã thúc đẩy sự phát triển của một tư duy an ninh mạng thế hệ mới mang tên Zero Trust (ZT - Không tin tưởng ngầm định).
+
+\subsection{Sự bùng nổ của Điện toán đám mây và dịch vụ SaaS}
+\label{subsec:1_1_1}
+
+Trong quá trình tiến hóa hạ tầng, sự bùng nổ của Điện toán đám mây và các dịch vụ Phần mềm như một Dịch vụ (\textit{SaaS - Software as a Service}) đóng vai trò là tác nhân chuyển dịch cốt lõi thông qua 4 khía cạnh:
+
+\begin{enumerate}
+    \item \textbf{Sự dịch chuyển sang hạ tầng Đa đám mây (\textit{Multi-Cloud Migration}):} Doanh nghiệp chủ động chuyển dịch các tải công việc (\textit{workloads}) từ trung tâm dữ liệu nội bộ (\textit{On-premises Data Center}) sang vận hành trên các nền tảng điện toán đám mây công cộng như Amazon Web Services (AWS), Microsoft Azure, và Google Cloud Platform (GCP). Việc áp dụng các mô hình Hạ tầng dưới dạng Dịch vụ (\textit{IaaS - Infrastructure as a Service}) và Nền tảng dưới dạng Dịch vụ (\textit{PaaS - Platform as a Service}) khiến dữ liệu nghiệp vụ không còn nằm trong phạm vi bảo vệ vật lý thuộc quyền kiểm soát trực tiếp của doanh nghiệp.
+    
+    \item \textbf{Sự phổ cập của các ứng dụng SaaS nghiệp vụ:} Các công cụ làm việc cốt lõi của tổ chức như Microsoft 365, Google Workspace, Salesforce hay Zoom được triển khai rộng rãi theo mô hình SaaS. Cán bộ nhân viên truy cập trực tiếp vào các ứng dụng này qua trình duyệt web trên nền tảng Internet công cộng, giảm dần sự phụ thuộc vào việc kết nối tập trung về máy chủ ứng dụng nội bộ qua mạng LAN truyền thống.
+    
+    \item \textbf{Thay đổi bản chất luồng lưu lượng mạng (\textit{Network Traffic}):} Tuyến truyền tải dữ liệu truyền thống theo mô hình tập trung ($\text{Người dùng} \rightarrow \text{Mạng nội bộ} \rightarrow \text{Trung tâm dữ liệu}$) dần được thay thế bởi mô hình kết nối phân tán ($\text{Người dùng} \rightarrow \text{Internet công cộng} \rightarrow \text{Dịch vụ Đám mây/SaaS}$).
+    
+    \item \textbf{Hiện tượng giảm hiệu lực ranh giới bảo mật (\textit{De-perimeterization}):} Do lưu lượng dữ liệu từ người dùng đến ứng dụng Đám mây/SaaS nhiều trường hợp đi thẳng qua Internet thay vì qua cổng kết nối gateway của trung tâm dữ liệu nội bộ, các cơ chế kiểm soát đặt tại chu vi trung tâm có thể mất khả năng quan sát trực tiếp một phần lưu lượng truy cập này, từ đó làm giảm hiệu quả giám sát của các thiết bị truyền thống như Tường lửa (\textit{Firewall}) hay Hệ thống phát hiện và ngăn ngừa xâm nhập (\textit{IDS/IPS}).
+\end{enumerate}
+
+Tóm lại, sự kết hợp giữa hạ tầng Đa đám mây và các dịch vụ SaaS đã làm mờ ranh giới bảo mật vật lý duy nhất của doanh nghiệp, đặt ra yêu cầu chuyển dịch sang mô hình an toàn thông tin phù hợp hơn — Kiến trúc Bảo mật Zero Trust.
+
+% ---------------------------------------------------------------------
+% 1.2. PHÂN TÍCH LỖ HỔNG CỦA MÔ HÌNH BẢO MẬT CHU VI
+% ---------------------------------------------------------------------
+\section{Phân tích lỗ hổng của Mô hình bảo mật chu vi (Perimeter Security)}
+\label{sec:1_2}
+
+\subsection{Nguyên lý ``Castle-and-Moat'' và khái niệm vùng tin tưởng nội bộ}
+\label{subsec:1_2_1}
+
+Mô hình phòng thủ mạng truyền thống vận hành dựa trên tư duy quân sự cổ điển mang tên ``Lâu đài và Hào nước'' (\textit{Castle-and-Moat}). Trong mô hình này, tòa thành đại diện cho toàn bộ tài nguyên nội bộ của doanh nghiệp, còn bức tường thành và hào nước chính là ranh giới chu vi mạng đóng vai trò ngăn cách giữa môi trường bên trong và bên ngoài.
+
+\begin{figure}[htbp]{Kiến trúc bảo mật mạng truyền thống dựa trên phân vùng tin tưởng (Traditional Network Security Architecture).}
+    \centering
+    \includegraphics[width=0.85\textwidth]{1.jpg}
+    \label{fig:1_1}
+\end{figure}
+
+Như được minh họa trong Hình~\ref{fig:1_1}, kiến trúc truyền thống phân chia mạng thành các vùng (\textit{zones}) chứa cấp độ tin cậy (\textit{Level of Trust}) tăng dần từ trái sang phải:
+\begin{itemize}
+    \item \textbf{Mạng không tin tưởng (\textit{Internet / Untrusted Zone}):} Nơi chứa các đối tượng bên ngoài như nhân viên làm việc từ xa (\textit{Remote employee}) hoặc khách hàng chưa được xác minh (\textit{Untrusted client}).
+    \item \textbf{Vùng đệm cách ly (\textit{DMZ - Demilitarized Zone}):} Nơi đặt các thiết bị giao tiếp cửa ngõ như cổng kết nối VPN (\textit{VPN gateway}) và bộ cân bằng tải (\textit{Load Balancer - LB}) nhằm tiếp nhận luồng dữ liệu từ bên ngoài.
+    \item \textbf{Vùng tin tưởng nội bộ (\textit{Trusted Zone}):} Nơi chứa các dịch vụ nội bộ (\textit{Private service}) và máy chủ ứng dụng (\textit{App server}).
+    \item \textbf{Vùng đặc quyền / Bảo mật cao (\textit{Privileged Zone}):} Nơi lưu trữ tài sản nhạy cảm như máy chủ cơ sở dữ liệu thanh toán (\textit{PCI server}), thường chỉ cho phép truy cập trực tiếp từ máy chủ ứng dụng.
+\end{itemize}
+
+Bản chất cốt lõi của mô hình này nằm ở triết lý: ``Niềm tin xác định mức độ bảo mật tối thiểu bắt buộc'' (\textit{Trust defines the minimum required security}). Khi một thiết bị nằm bên trong ``Vùng tin tưởng nội bộ'', nó thường mặc định được coi là an toàn, dẫn đến việc hệ thống giảm bớt các cơ chế kiểm tra chuyên sâu, nhiều luồng dữ liệu nội bộ không được mã hóa mặc định và hạn chế việc xác thực lại liên tục giữa các nút mạng ngang hàng.
+
+\begin{figure}[htbp]{Sự tích tụ ngoại lệ tường lửa khi kết nối mạng văn phòng (Corp), vùng đệm (DMZ) và mạng đối tác (Partner).}
+    \centering
+    \includegraphics[width=0.75\textwidth]{2.jpg}
+    \label{fig:1_2}
+\end{figure}
+
+Tuy nhiên, khi doanh nghiệp mở rộng kết nối với các bên thứ ba và mạng đối tác (\textit{Partner Network}), bức tường lửa chu vi bắt buộc phải tạo các quy tắc ngoại lệ (\textit{Rule Holes}) như trong Hình~\ref{fig:1_2}. Sự tích tụ theo thời gian của các quy tắc ngoại lệ này làm suy yếu ranh giới bảo mật cứng ban đầu.
+
+\begin{figure}[htbp]{Sự tương tác kết nối chéo giữa Mạng văn phòng doanh nghiệp (Corp) và Trung tâm dữ liệu sản xuất (DC/Production).}
+    \centering
+    \includegraphics[width=0.80\textwidth]{4.jpg}
+    \label{fig:1_3}
+\end{figure}
+
+Hình~\ref{fig:1_3} minh họa thực tế tương tác phức tạp giữa mạng doanh nghiệp (\textit{Corp}) và trung tâm dữ liệu sản xuất (\textit{DC}): nhân viên không có đặc quyền (\textit{Unprivileged employee}) phải truy cập CSDL Nhân sự (\textit{HR}), trong khi nhân viên đặc quyền (\textit{Privileged employee}) kết nối trực tiếp vào máy chủ ứng dụng (\textit{App}) tại trung tâm dữ liệu. Các luồng kết nối chéo này có thể biến phân vùng bảo mật thành điểm nhảy (\textit{pivoting points}) cho kẻ tấn công nếu một thiết bị bị chiếm quyền kiểm soát.
+
+\subsection{Hạn chế của Tường lửa chu vi và kỹ thuật khai thác kết nối Outbound}
+\label{subsec:1_2_2}
+
+Sự chuyển dịch sang bộ giao thức TCP/IP mang lại sự linh hoạt nhưng đòi hỏi cơ chế kiểm soát chặt chẽ. Mặc dù giao thức TCP/IP hỗ trợ kết nối hai chiều (\textit{Bi-directional communication}), nhiều cấu hình tường lửa chu vi truyền thống vì lý do tối ưu vận hành thường áp dụng chính sách nới lỏng kiểm soát đối với luồng lưu lượng đi ra (\textit{Outbound Traffic}) so với luồng đi vào (\textit{Inbound Traffic}).
+
+\begin{figure}[htbp]{Tiến trình tấn công do máy nạn nhân khởi tạo kết nối đi ra (Outbound) vượt qua tường lửa chu vi.}
+    \centering
+    \includegraphics[width=0.75\textwidth]{3.jpg}
+    \label{fig:1_4}
+\end{figure}
+
+Sơ đồ trình tự trong Hình~\ref{fig:1_4} mô tả chi tiết cách kẻ tấn công lợi dụng chính sách luồng Outbound nới lỏng để xâm nhập qua tường lửa chu vi (\textit{Perimeter FW}) thông qua một chuỗi kết nối do chính thiết bị nạn nhân (\textit{Victim}) khởi tạo:
+\begin{enumerate}
+    \item \textbf{Khởi tạo kết nối (\textit{Visits infected site}):} Nạn nhân truy cập vào trang web bị lây nhiễm hoặc mở tệp đính kèm chứa mã độc từ email lừa đảo (\textit{Phishing}).
+    \item \textbf{Tải mã độc (\textit{Delivers malicious payload}):} Máy chủ của kẻ tấn công (\textit{Attacker}) gửi gói dữ liệu độc hại về máy nạn nhân.
+    \item \textbf{Mã độc gọi về C2 (\textit{Malware phones home}):} Mã độc thực thi trên máy nạn nhân, chủ động khởi tạo một kết nối TCP đi ra (\textit{Outbound}) gửi về máy chủ điều khiển C2 (\textit{Command and Control}). Do tường lửa cửa ngõ thường cho phép lưu lượng web Outbound thông thường đi qua, kết nối này dễ dàng được thiết lập.
+    \item \textbf{Thiết lập Command \& Control (\textit{C2 Established}):} Kênh điều khiển hai chiều được thiết lập hoàn tất dưới dạng đường hầm ngược (\textit{Reverse Shell}), cho phép kẻ tấn công gửi lệnh điều khiển vào bên trong mạng nội bộ.
+    \item \textbf{Rút hái dữ liệu (\textit{Data exfiltrated}):} Dữ liệu nhạy cảm thu thập được bị đóng gói và gửi ngược ra ngoài Internet thông qua chính kênh kết nối Outbound đã khởi tạo.
+\end{enumerate}
+
+\subsection{Sơ đồ tiến trình tấn công điển hình và nguy cơ di chuyển sang ngang}
+\label{subsec:1_2_3}
+
+Một khi kẻ tấn công đã tạo được kênh giao tiếp ngược vào bên trong mạng doanh nghiệp, chúng bắt đầu tận dụng sự thiếu vắng các rào cản kiểm soát nội bộ để tiến hành mở rộng phạm vi ảnh hưởng qua các kỹ thuật cốt lõi:
+\begin{itemize}
+    \item \textbf{Trích xuất thông tin xác thực (\textit{Credential Theft}):} Thu thập trái phép tài khoản, mật khẩu, token xác thực hoặc khóa mã hóa.
+    \item \textbf{Leo thang đặc quyền (\textit{Privilege Escalation}):} Khai thác lỗ hổng hoặc dùng credential chiếm đoạt để nâng đặc quyền lên quyền quản trị (\textit{Admin/Root}).
+    \item \textbf{Di chuyển sang ngang (\textit{Lateral Movement}):} Sử dụng quyền hạn và thông tin xác thực đã chiếm đoạt để dò quét, kết nối và truy cập sang các máy trạm và máy chủ khác trong mạng nội bộ.
+\end{itemize}
+
+\begin{figure}[htbp]{Sơ đồ tiến trình tấn công 10 bước xâm nhập mạng doanh nghiệp và đánh cắp dữ liệu sản xuất (Example Attack Progression).}
+    \centering
+    \includegraphics[width=0.82\textwidth]{5.jpg}
+    \label{fig:1_5}
+\end{figure}
+
+Hình~\ref{fig:1_5} phác thảo kịch bản tấn công thực tế gồm 10 giai đoạn thể hiện chuỗi liên kết của các kỹ thuật trên:
+\begin{enumerate}
+    \item[\textbf{a)}] \textbf{Tấn công Phishing:} Kẻ tấn công nhắm mục tiêu vào nhân viên qua email lừa đảo.
+    \item[\textbf{b)}] \textbf{Chiếm máy \& Đẩy Shell:} Máy công ty bị xâm nhập, mã độc đẩy ngược Shell ra ngoài.
+    \item[\textbf{c)}] \textbf{Di chuyển sang ngang (\textit{Lateral Movement}):} Kẻ tấn công quét mạng nội bộ vốn không có rào cản kiểm soát.
+    \item[\textbf{d)}] \textbf{Định vị máy trạm đặc quyền:} Tìm thấy máy tính làm việc của lập trình viên/quản trị viên.
+    \item[\textbf{e)}] \textbf{Leo quyền \& Cài Keylogger:} Leo quyền Admin cục bộ trên máy trạm và cài phần mềm theo dõi bàn phím.
+    \item[\textbf{f)}] \textbf{Đánh cắp mật khẩu:} Thu thập thông tin đăng nhập của lập trình viên.
+    \item[\textbf{g)}] \textbf{Truy cập máy chủ Production:} Dùng tài khoản chiếm đoạt để kết nối vào máy chủ ứng dụng thật (\textit{Prod App Host}).
+    \item[\textbf{h)}] \textbf{Leo quyền trên Prod Host:} Nâng đặc quyền quản trị tối cao trên máy chủ ứng dụng.
+    \item[\textbf{i)}] \textbf{Đánh cắp credential CSDL:} Trích xuất thông tin truy cập Cơ sở dữ liệu từ ứng dụng.
+    \item[\textbf{j)}] \textbf{Rút hái dữ liệu (\textit{Exfiltration}):} Truy cập CSDL và tuồn toàn bộ dữ liệu ra ngoài Internet qua máy chủ ứng dụng bị chiếm đoạt.
+\end{enumerate}
+
+\subsection{Thiếu sót trong kiểm soát lưu lượng nội vùng và điểm lỗi đơn lẻ}
+\label{subsec:1_2_4}
+
+Sự thất bại của bảo mật chu vi truyền thống được tổng kết qua 3 nhược điểm kiến trúc cốt lõi:
+\begin{itemize}
+    \item \textbf{Thiếu khả năng kiểm tra lưu lượng nội vùng (\textit{Lack of intra-zone traffic inspection}):} Do giả định các thiết bị trong cùng một phân vùng mạng là an toàn, lưu lượng trao đổi trực tiếp giữa các máy chủ nội bộ thường không được giám sát hoặc mã hóa chuyên sâu.
+    \item \textbf{Thiếu tính linh hoạt trong bố trí máy chủ (\textit{Lack of host placement flexibility}):} Cấu hình phân đoạn mạng tĩnh dựa trên địa chỉ IP gây cản trở lớn khi dịch chuyển ứng dụng sang hạ tầng Đa đám mây động.
+    \item \textbf{Tồn tại điểm lỗi đơn lẻ (\textit{Single Points of Failure - SPOF}) về mặt kiến trúc:} Do toàn bộ lưu lượng mạng được định tuyến tập trung qua một số ít thiết bị kiểm soát chu vi cửa ngõ (như Tường lửa trung tâm hoặc cổng VPN Gateway) để thực thi chính sách, kiến trúc này vô hình trung tạo ra nút thắt cổ chai hiệu năng. Khi các thiết bị tập trung này gặp sự cố phần cứng, lỗi cấu hình hoặc bị tấn công từ chối dịch vụ (DoS/DDoS), toàn bộ hoạt động kết nối và truy cập tài nguyên của doanh nghiệp có nguy cơ bị gián đoạn hoàn toàn.
+\end{itemize}
+
+Những hạn chế này đặt ra yêu cầu chuyển dịch sang Kiến trúc Bảo mật Zero Trust — nơi loại bỏ hoàn toàn ``Sự tin cậy ngầm định'' và phân tán cơ chế thực thi bảo mật ra sát biên mạng.
+% =====================================================================
+% 1.3. TRIẾT LÝ ZERO TRUST (ZTA PHILOSOPHY)
+% =====================================================================
+\section{Triết lý Zero Trust (ZTA Philosophy)}
+\label{sec:1_3}
+
+\subsection{Sự ra đời của khái niệm Zero Trust}
+\label{subsec:1_3_1}
+
+Khái niệm Zero Trust được khởi xướng và giới thiệu lần đầu tiên vào năm 2010 bởi John Kindervag khi ông làm việc tại Forrester Research. Bối cảnh ra đời của mô hình xuất phát từ sự thất bại của tư duy phòng thủ truyền thống: vốn tập trung toàn bộ nguồn lực vào việc xây dựng bức tường chu vi cứng cáp, nhưng sau khi đối tượng vượt qua rào cản cửa ngõ và vào được mạng nội bộ, họ lại được cấp quyền truy cập rộng rãi vào một tập hợp tài nguyên lớn. Hạn chế này khiến nguy cơ di chuyển sang ngang trái phép (\textit{Lateral Movement}) trở thành một trong những thách thức an ninh mạng nghiêm trọng nhất đối với các tổ chức và doanh nghiệp.
+
+John Kindervag nhấn mạnh rằng trong an toàn thông tin, ``Sự tin cậy'' (\textit{Trust}) không phải là một thuộc tính bảo mật mà chính là một kẽ hở kiến trúc nguy hiểm. Vì vậy, Zero Trust ra đời nhằm xóa bỏ hoàn toàn khái niệm vùng tin tưởng ngầm định (\textit{Implicit Trust Zone}) bên trong mạng nội bộ.
+
+\subsection{Định nghĩa nguyên tắc cốt lõi: ``Never Trust, Always Verify''}
+\label{subsec:1_3_2}
+
+Tư duy Zero Trust thay thế phương châm phòng thủ truyền thống bằng triết lý cốt lõi: \textbf{\textit{``Never Trust, Always Verify''}} (Không bao giờ tin tưởng ngầm định, luôn luôn xác thực). Theo triết lý này:
+\begin{itemize}
+    \item \textbf{Không cấp niềm tin ngầm định:} Niềm tin không bao giờ được mặc định trao cho bất kỳ người dùng, thiết bị hay tài khoản nào chỉ dựa vào vị trí vật lý hay vị trí mạng của chúng (như việc nằm trong mạng LAN hay truy cập qua VPN).
+    \item \textbf{Đánh giá liên tục (\textit{Continuous Evaluation}):} Mọi yêu cầu truy cập tài nguyên đều phải được xác thực, ủy quyền và đánh giá rủi ro một cách liên tục trong suốt quá trình kết nối chứ không chỉ kiểm tra một lần duy nhất tại thời điểm đăng nhập ban đầu.
+    \item \textbf{Nguyên tắc quyền truy cập tối thiểu (\textit{Least Privilege}):} Trọng tâm kiểm soát tập trung vào việc giới hạn tài nguyên cho những đối tượng thực sự có nhu cầu nghiệp vụ, đồng thời chỉ cấp các quyền thao tác tối thiểu (như đọc, ghi, xóa) vừa đủ để hoàn thành tác vụ.
+\end{itemize}
+
+\subsection{Đổi mới tư duy: Chuyển từ ``Bảo mật vị trí mạng'' sang ``Bảo mật danh tính và ứng dụng''}
+\label{subsec:1_3_3}
+
+Mô hình Zero Trust đánh dấu một bước chuyển dịch tư duy toàn diện trong kiến trúc bảo mật doanh nghiệp hiện đại:
+\begin{itemize}
+    \item \textbf{Bảo vệ toàn diện từ đầu đến cuối (\textit{End-to-End Security}):} Zero Trust không chỉ đơn thuần là việc cài đặt một thiết bị mạng đơn lẻ, mà là một phương pháp tiếp cận toàn diện từ đầu đến cuối để bảo vệ tài nguyên và dữ liệu doanh nghiệp. Hệ thống này bao hàm và xâu chuỗi chặt chẽ các thành phần: Quản lý định danh (\textit{Identity}), Thông tin xác thực (\textit{Credentials}), Quản lý truy cập (\textit{Access Management}), Thiết bị đầu cuối (\textit{Endpoints}), Môi trường lưu trữ/máy chủ (\textit{Hosting Environments}) và Hạ tầng kết nối (\textit{Interconnecting Infrastructure}).
+    
+    \item \textbf{Dịch chuyển ranh giới bảo vệ:} Thay vì tập trung bảo vệ các phân đoạn mạng vật lý diện rộng (\textit{Network Segments}), Zero Trust thu nhỏ ranh giới bảo mật và tập trung bảo vệ trực tiếp vào từng tài nguyên cụ thể (dữ liệu, ứng dụng, dịch vụ, thiết bị).
+    
+    \item \textbf{Xác thực dựa trên ngữ cảnh thực tế:} Quyết định cấp phép truy cập không dựa trên địa chỉ IP hay vị trí kết nối, mà dựa trên việc tổng hợp và phân tích ngữ cảnh thực thời (\textit{Context-aware}): danh tính người dùng, trạng thái an toàn của thiết bị đầu cuối, ứng dụng yêu cầu và mức độ nhạy cảm của tài nguyên dữ liệu.
+\end{itemize}
+
+
+\chapter{CƠ SỞ LÝ THUYẾT VÀ CÁC MÔ HÌNH NỀN TẢNG ZERO TRUST}
+\label{chap:chuong_2}
+
+% ==========================================
+% SECTION 2.1
+% ==========================================
+\section{Khung kiến trúc tham chiếu NIST SP 800-207 và Triết lý Zero Trust}
+\label{sec:2_1}
+
+\subsection{Khái niệm và 5 giả định kỹ thuật cốt lõi của Zero Trust}
+\label{subsec:2_1_1}
+
+Theo đặc tả của Viện Tiêu chuẩn và Công nghệ Quốc gia Mỹ (NIST SP 800-207), Zero Trust (ZT) là bộ các khái niệm và ý tưởng nhằm tối thiểu hóa sự không chắc chắn trong việc thực thi các quyết định truy cập chính xác, cấp quyền tối thiểu (\textit{Least Privilege}) trên từng yêu cầu truy cập trong điều kiện hệ thống mạng bị xem là đã bị xâm nhập.
+
+Triết lý của Zero Trust dựa trên 5 giả định kỹ thuật nền tảng:
+\begin{enumerate}
+    \item Mạng truyền dẫn luôn được coi là môi trường độc hại (\textit{The network is always assumed to be hostile}).
+    \item Các mối đe dọa bên trong và bên ngoài luôn tồn tại trên mạng tại mọi thời điểm.
+    \item Vị trí kết nối mạng không đủ cơ sở để quyết định độ tin cậy.
+    \item Mọi thiết bị, người dùng và luồng lưu lượng đều phải được xác thực và cấp quyền.
+    \item Chính sách bảo mật phải mang tính động và được tính toán từ nhiều nguồn dữ liệu đa dạng.
+\end{enumerate}
+
+\subsection{7 Nguyên tắc vàng của Kiến trúc Zero Trust (NIST SP 800-207)}
+\label{subsec:2_1_2}
+
+Khung kiến trúc ZTA chuẩn mực bắt buộc phải tuân thủ và vận hành dựa trên 7 nguyên tắc cốt lõi:
+\begin{enumerate}
+    \item Tất cả các nguồn dữ liệu và dịch vụ tính toán đều được coi là tài nguyên.
+    \item Mọi giao tiếp đều phải được bảo vệ bất kể vị trí mạng.
+    \item Cấp quyền truy cập theo từng phiên làm việc (\textit{Per-session basis}).
+    \item Quyền truy cập được quyết định bởi chính sách động dựa trên thuộc tính thực thời.
+    \item Doanh nghiệp giám sát và đo lường liên tục tính toàn vẹn và trạng thái an toàn của mọi tài sản.
+    \item Mọi xác thực và ủy quyền đều mang tính động và được thực thi nghiêm ngặt.
+    \item Thu thập tối đa thông tin ngữ cảnh để liên tục cải thiện trạng thái bảo mật.
+\end{enumerate}
+
+\subsection{Phân tách Mặt phẳng Kiểm soát (Control Plane) và Mặt phẳng Dữ liệu (Data Plane)}
+\label{subsec:2_1_3}
+
+Để thực hiện kiểm soát truy cập động, hệ thống thực hiện phân tách triệt để hai mặt phẳng vận hành:
+\begin{itemize}
+    \item \textbf{Mặt phẳng kiểm soát (\textit{Control Plane}):} Trung tâm ra quyết định, chịu trách nhiệm xác thực định danh, đánh giá rủi ro ngữ cảnh, tính toán điểm tin cậy và điều hướng cấu hình.
+    \item \textbf{Mặt phẳng dữ liệu (\textit{Data Plane}):} Nơi vận chuyển luồng dữ liệu ứng dụng thực tế. Kênh này chỉ được thiết lập sau khi Control Plane cấp phép thành công.
+\end{itemize}
+
+\subsection{Ba thành phần logic cốt lõi và các nguồn dữ liệu phụ trợ}
+\label{subsec:2_1_4}
+
+Kiến trúc ZTA vận hành dựa trên bộ ba thành phần logic chính:
+\begin{itemize}
+    \item \textbf{Policy Engine (PE):} Động cơ quyết định chính sách, sử dụng thuật toán tin cậy (\textit{Trust Algorithm}) để đưa ra quyết định chấp thuận hoặc từ chối truy cập.
+    \item \textbf{Policy Administrator (PA):} Thành phần quản trị chính sách, phát tín hiệu điều khiển tới điểm thực thi để mở hoặc đóng kênh dữ liệu. Bộ đôi PE và PA hợp thành Điểm quyết định chính sách (\textit{Policy Decision Point - PDP}).
+    \item \textbf{Policy Enforcement Point (PEP):} Điểm thực thi chính sách nằm trên mặt phẳng dữ liệu, trực tiếp giám sát và chấm dứt kết nối theo chỉ thị từ PA.
+\end{itemize}
+
+Cơ chế PDP đưa ra quyết định chính xác nhờ tích hợp liên tục dữ liệu từ các nguồn phụ trợ: IdP/IAM, EDR/MDM, Threat Intelligence, SIEM/Activity Logs và hạ tầng PKI.
+
+% ==========================================
+% SECTION 2.2
+% ==========================================
+\section{Mô hình Độ trưởng thành CISA (Zero Trust Maturity Model v2.0)}
+\label{sec:2_2}
+
+Mô hình ZTMM v2.0 của CISA định hình lộ trình chuyển đổi qua 5 trụ cột và 4 giai đoạn tiến hóa.
+
+\subsection{5 Trụ cột bảo mật cốt lõi}
+\label{subsec:2_2_1}
+
+\begin{enumerate}
+    \item \textbf{Định danh (\textit{Identity}):} Quản lý người dùng và các đối tượng không phải con người (\textit{NPE}). Thực thi Phishing-resistant MFA (FIDO2, PIV), hợp nhất kho định danh.
+    \item \textbf{Thiết bị (\textit{Devices}):} Quản lý tài sản phần cứng và tài sản ảo, tự động hóa kiểm tra posture, triển khai giải pháp EDR.
+    \item \textbf{Mạng (\textit{Networks}):} Chuyển từ bảo mật chu vi rộng sang các vùng vi chu vi (\textit{Micro-perimeters}), phân đoạn vi mô và mã hóa toàn bộ lưu lượng.
+    \item \textbf{Ứng dụng và Tải công việc (\textit{Applications \& Workloads}):} Bảo mật ứng dụng trên hạ tầng on-premises và đám mây, tích hợp DevSecOps, sử dụng tải công việc bất biến.
+    \item \textbf{Dữ liệu (\textit{Data}):} Tự động phân loại, gắn nhãn dữ liệu, mã hóa ở cả 3 trạng thái và triển khai hệ thống DLP.
+\end{enumerate}
+
+\subsection{Các Năng lực xuyên suốt (Cross-Cutting Capabilities)}
+\label{subsec:2_2_2}
+
+\begin{itemize}
+    \item \textbf{Khả năng quan sát và Phân tích (\textit{Visibility \& Analytics}):} Phân tích hành vi (UEBA) và săn tìm mối đe dọa (\textit{Threat Hunting}) dựa trên log/telemetry tập trung.
+    \item \textbf{Tự động hóa và Điều phối (\textit{Automation \& Orchestration}):} Tự động phản ứng sự cố và thực thi chính sách đồng bộ.
+    \item \textbf{Quản trị (\textit{Governance}):} Định nghĩa quy trình tuân thủ an toàn thông tin và quản lý rủi ro doanh nghiệp.
+\end{itemize}
+
+\subsection{4 Giai đoạn phát triển độ trưởng thành}
+\label{subsec:2_2_3}
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng so sánh 4 giai đoạn tiến hóa độ trưởng thành Zero Trust theo CISA ZTMM v2.0}
+\label{tab:cisa_maturity_stages}
+\small
+\begin{tabular}{|p{3cm}|p{10.5cm}|}
+\hline
+\textbf{Giai đoạn} & \textbf{Đặc trưng kỹ thuật cốt lõi} \\ \hline
+\textbf{Truyền thống (\textit{Traditional})} & Cấu hình thủ công; bảo mật dựa trên chu vi tĩnh (Firewall, VPN); xác thực bằng mật khẩu/MFA tĩnh; cấp quyền cố định; quản lý tài sản và phản ứng sự cố rời rạc. \\ \hline
+\textbf{Khởi đầu (\textit{Initial})} & Bắt đầu tự động hóa một số quy trình; áp dụng MFA kết hợp kiểm tra thuộc tính cơ bản; cô lập các tải công việc quan trọng; tập trung hóa thu thập log. \\ \hline
+\textbf{Nâng cao (\textit{Advanced})} & Kiểm soát tự động hóa rộng rãi; áp dụng Phishing-resistant MFA (FIDO2/PIV); phân đoạn vi mô; mã hóa toàn bộ dữ liệu lưu trữ/đường truyền; ra quyết định truy cập theo thời gian thực. \\ \hline
+\textbf{Tối ưu (\textit{Optimal})} & Tự động hóa hoàn toàn và liên tục (\textit{Just-in-Time \& Just-Enough Access}); chính sách động tự điều chỉnh bằng AI/ML; tải công việc bất biến; mã hóa dữ liệu khi đang xử lý (\textit{In-Use}). \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tiêu chí đánh giá mức độ sẵn sàng chuyển đổi}
+\label{subsec:2_2_4}
+
+Mô hình định nghĩa bộ chỉ số đánh giá hiện trạng chuyển đổi trên từng trụ cột:
+\begin{itemize}
+    \item \textbf{Tiêu chí Định danh:} Tỷ lệ áp dụng FIDO2/WebAuthn, mức độ hợp nhất kho định danh và năng lực cấp quyền ABAC/JIT.
+    \item \textbf{Tiêu chí Thiết bị:} Khả năng tự động kiểm kê 100\% tài sản, tỷ lệ phủ EDR/MDM và năng lực tự động cách ly thiết bị không tuân thủ.
+    \item \textbf{Tiêu chí Mạng:} Mức độ phân đoạn vi mô tầng ứng dụng, khả năng ẩn hệ thống ("Dark Cloud") và tỷ lệ mã hóa TLS 1.3/mTLS.
+    \item \textbf{Tiêu chí Ứng dụng \& Tải công việc:} Tích hợp SAST/DAST vào CI/CD, loại bỏ quyền truy cập trực tiếp của admin vào Production và tỷ lệ container bất biến.
+    \item \textbf{Tiêu chí Dữ liệu:} Tự động phân loại, gắn nhãn dữ liệu, triển khai DLP theo ngữ cảnh và mã hóa ở cả 3 trạng thái.
+\end{itemize}
+
+% ==========================================
+% SECTION 2.3
+% ==========================================
+\section{Các cơ chế kỹ thuật và giải pháp công nghệ nền tảng trong ZTA}
+\label{sec:2_3}
+
+Việc hiện thực hóa ZTA đòi hỏi kết hợp đồng bộ các cơ chế kỹ thuật sau:
+
+\subsection{Cơ chế xác thực và ủy quyền động dựa trên Network Agent và Trust Engine}
+\label{subsec:2_3_1}
+
+Mô hình \textbf{Thực thể đại diện mạng (\textit{Network Agent})} hợp nhất ngữ cảnh truy cập thành một đối tượng đánh giá duy nhất.
+
+\begin{enumerate}
+    \item \textbf{Cấu trúc của Network Agent:} Hợp nhất ba yếu tố bộ ba: Định danh người dùng (\textit{User Identity}), Trạng thái an toàn của thiết bị (\textit{Device Posture}) và Ứng dụng/Tải công việc khởi tạo kết nối (\textit{Application Context}).
+    \item \textbf{Nguyên lý hoạt động của Động cơ tin cậy (\textit{Trust Engine}):} Trust Engine liên tục thu thập dữ liệu từ IdP, EDR, MDM và SIEM để tính toán toán học điểm tin cậy biến đổi (\textit{Variable Trust Score}):
+    \begin{equation}
+        T_{\text{score}} = f(\text{Identity\_Risk}, \text{Device\_Health}, \text{Network\_Location}, \text{Behavioral\_Anomaly})
+    \end{equation}
+    \item \textbf{Đánh giá và cấp quyền động:} Nếu điểm tin cậy $T_{\text{score}}$ vượt qua ngưỡng an toàn $T_{\text{threshold}}$ do chính sách quy định đối với tài nguyên nhạy cảm $R_k$, PA mới phát tín hiệu xuống PEP để mở kênh kết nối tạm thời. Ngược lại, nếu trong quá trình kết nối điểm $T_{\text{score}}$ suy giảm, kết nối sẽ lập tức bị hủy bỏ hoặc yêu cầu xác thực lại bằng Phishing-resistant MFA.
+\end{enumerate}
+
+\subsection{Cơ chế phân đoạn vi mô (Micro-segmentation) và Kỹ thuật xác thực trước gói tin (SPA)}
+\label{subsec:2_3_2}
+
+\subsection{Phân đoạn vi mô (\textit{Micro-segmentation})}
+Phân đoạn vi mô thu nhỏ chu vi an toàn thành các vùng vi chu vi (\textit{Micro-perimeters}) bao quanh từng ứng dụng hoặc tải công việc (\textit{Workload}):
+\begin{itemize}
+    \item \textbf{Phân đoạn dựa trên hồ sơ ứng dụng (\textit{Application Profiling}):} Thiết lập chính sách kiểm soát lưu lượng tầng ứng dụng (Layer 7) thay vì dựa vào IP/Subnet.
+    \item \textbf{Kiểm soát luồng di chuyển ngang (\textit{East-West Traffic Inspection}):} Mọi luồng giao tiếp giữa các máy chủ ứng dụng (\textit{App Server}) và máy chủ cơ sở dữ liệu (\textit{DB Server}) đều phải qua PEP, ngăn chặn kẻ tấn công dùng máy chủ bị chiếm quyền làm điểm nhảy (\textit{Pivoting}).
+\end{itemize}
+
+\subsection{Kỹ thuật xác thực trước gói tin (\textit{Single Packet Authorization - SPA})}
+SPA giải quyết bài toán "gói tin đầu tiên" (\textit{First Packet Problem}) bằng cơ chế "Dark Cloud" (Ẩn hạ tầng):
+\begin{enumerate}
+    \item \textbf{Khởi tạo gói tin SPA:} Thiết bị đóng gói dữ liệu xác thực mã hóa ngắn (định danh, timestamp, OTP, chữ ký số HMAC) vào duy nhất một gói tin UDP.
+    \item \textbf{Kiểm tra thụ động tại PEP:} PEP lắng nghe thụ động (Passive Sniffing) và không mở bất kỳ cổng TCP nào ra ngoài. Khi nhận gói tin UDP SPA, PEP giải mã và kiểm tra chữ ký HMAC.
+    \item \textbf{Mở cổng động (\textit{Dynamic Pinholing}):} Nếu SPA hợp lệ, PEP thêm quy tắc tường lửa động mở cổng dịch vụ cho duy nhất địa chỉ IP người gửi trong vài giây. Mọi gói tin từ IP khác đều bị silently dropped.
+\end{enumerate}
+
+\subsection{Mã hóa toàn diện đường truyền và cơ chế mTLS / IPsec}
+\label{subsec:2_3_3}
+
+Mọi lưu lượng dữ liệu trao đổi trong ZTA bắt buộc phải được mã hóa end-to-end:
+\begin{itemize}
+    \item \textbf{Xác thực TLS hai chiều (\textit{Mutually Authenticated TLS - mTLS}):} Triển khai ở tầng ứng dụng (Layer 7). Cả máy chủ và máy khách đều phải xuất trình chứng thư số X.509 hợp lệ do PKI cấp phát.
+    \item \textbf{Bảo mật tầng mạng với IPsec (IKEv2):} Triển khai ở tầng mạng (Layer 3/4) cho giao tiếp máy chủ - máy chủ hoặc đám mây đa vùng, thiết lập tuyến đường hầm mã hóa bảo mật.
+\end{itemize}
+
+\subsection{Bảo vệ dữ liệu toàn diện ở 3 trạng thái}
+\label{subsec:2_3_4}
+
+Dữ liệu được bảo vệ xuyên suốt chu kỳ sống theo 3 trạng thái:
+
+\begin{table}[htbp]
+\centering
+\caption{Cơ chế bảo vệ dữ liệu ở 3 trạng thái theo chuẩn ZTA}
+\label{tab:data_security_3_states}
+\small
+\begin{tabular}{|p{3.5cm}|p{5.5cm}|p{5cm}|}
+\hline
+\textbf{Trạng thái Dữ liệu} & \textbf{Biện pháp Kỹ thuật Triển khai} & \textbf{Công nghệ \& Giao thức} \\ \hline
+\textbf{Dữ liệu lưu trữ (\textit{Data at Rest})} & Mã hóa toàn bộ ổ đĩa, cơ sở dữ liệu, bản sao lưu; quản lý khóa tập trung bằng HSM. & Thuật toán AES-256, TPM/HSM, KMS. \\ \hline
+\textbf{Dữ liệu đường truyền (\textit{Data in Transit})} & Mã hóa bắt buộc mọi luồng lưu lượng nội bộ (East-West) và công cộng (North-South). & mTLS 1.3, IPsec (IKEv2), HTTPS (TLS 1.3). \\ \hline
+\textbf{Dữ liệu đang xử lý (\textit{Data in Use})} & Cách ly môi trường tính toán trong bộ nhớ RAM, ngăn chặn đọc trộm dữ liệu cấp kernel. & Điện toán bảo mật (\textit{Confidential Computing}), Hardware Enclaves (Intel SGX, AMD SEV). \\ \hline
+\end{tabular}
+\end{table}
+
+% ==========================================
+% SECTION 2.4
+% ==========================================
+\section{So sánh Mô hình An ninh Chu vi và Kiến trúc Zero Trust}
+\label{sec:2_4}
+
+Bảng \ref{tab:comparison_perimeter_vs_zta} đối chiếu chi tiết hai mô hình an ninh mạng trên các tiêu chí kiến trúc cốt lõi:
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng so sánh đối chiếu giữa Mô hình An ninh Chu vi và Kiến trúc Zero Trust}
+\label{tab:comparison_perimeter_vs_zta}
+\small
+\begin{tabular}{|p{3cm}|p{5.5cm}|p{5.5cm}|}
+\hline
+\textbf{Tiêu chí Đánh giá} & \textbf{Mô hình Chu vi Truyền thống (\textit{Perimeter Model})} & \textbf{Kiến trúc Zero Trust (\textit{ZTA})} \\ \hline
+\textbf{Triết lý Độ tin cậy} & Tin cậy mặc định (\textit{Implicit Trust}) dựa trên vị trí mạng nội bộ hoặc VPN. & Không tin tưởng mặc định (\textit{Zero Implicit Trust}), "Never Trust, Always Verify". \\ \hline
+\textbf{Trọng tâm Bảo vệ} & Bảo vệ chu vi mạng vật lý, phân vùng IP tĩnh (VLAN, Subnet). & Bảo vệ trực tiếp tài sản dữ liệu, ứng dụng, định danh và thiết bị. \\ \hline
+\textbf{Cơ chế Phân quyền} & Cấp quyền tĩnh, diện rộng sau khi vượt qua tường lửa/VPN. & Cấp quyền tối thiểu (\textit{Least Privilege}), theo từng phiên (\textit{Per-session}) và ngữ cảnh. \\ \hline
+\textbf{Xác thực \& Ủy quyền} & Xác thực một lần duy nhất (\textit{One-time Authentication}) tại thời điểm đăng nhập. & Xác thực và ủy quyền liên tục (\textit{Continuous Evaluation}) trong suốt phiên kết nối. \\ \hline
+\textbf{Giám sát lưu lượng} & Kiểm soát lưu lượng biên (North-South); bỏ qua lưu lượng nội bộ (East-West). & Phân đoạn vi mô, mã hóa và kiểm tra 100\% luồng lưu lượng (North-South \& East-West). \\ \hline
+\textbf{Khả năng ẩn hạ tầng} & Các cổng dịch vụ hé lộ công khai trên Internet, dễ bị quét port. & Ẩn hoàn toàn tài nguyên khỏi mạng công cộng nhờ SPA/SDP ("Dark Cloud"). \\ \hline
+\textbf{Bán kính Thiệt hại (\textit{Blast Radius})} & Rộng. Khi bị xâm nhập 1 node, kẻ tấn công dễ dàng di chuyển sang ngang. & Hẹp. Vi chu vi và cô lập tức thì giúp khoanh vùng thiết bị bị thỏa hiệp. \\ \hline
+\end{tabular}
+\end{table}
+
+% ==========================================
+% SECTION 2.5
+% ==========================================
+\section{Các Thách thức Kỹ thuật và Vận hành khi Triển khai ZTA}
+\label{sec:2_5}
+
+Mặc dù mang lại hiệu quả vượt trội trong việc bảo vệ hệ thống trước các mối đe dọa hiện đại, quá trình dịch chuyển sang Kiến trúc Zero Trust đặt ra những thách thức lớn đối với doanh nghiệp:
+
+\begin{enumerate}
+    \item \textbf{Tương thích với hệ thống cũ (\textit{Legacy Systems}):} Các ứng dụng cổ điển (\textit{Legacy applications}) hoặc thiết bị công nghiệp (OT/IoT) không hỗ trợ giao thức mTLS, không tích hợp được với các hệ thống IdP hiện đại (OAuth2/OIDC/SAML) hoặc không cho phép cài đặt các Agent EDR/MDM.
+    \item \textbf{Độ trễ và hiệu năng hệ thống (\textit{Performance Overhead}):} Việc kiểm tra ngữ cảnh liên tục, giải mã/mã hóa dữ liệu tại các PEP và tính toán điểm tin cậy thời gian thực trên Trust Engine có thể gia tăng độ trễ kết nối (\textit{Latency}), ảnh hưởng đến trải nghiệm người dùng nếu hạ tầng không được tối ưu hóa.
+    \item \textbf{Độ phức tạp trong quản trị chính sách (\textit{Policy Complexity}):} Việc chuyển sang mô hình kiểm soát truy cập dựa trên thuộc tính (\textit{ABAC}) đòi hỏi định nghĩa hàng nghìn quy tắc động. Cấu hình sai chính sách tại Động cơ chính sách (PE) có thể dẫn đến việc từ chối dịch vụ nhầm đối với người dùng hợp lệ hoặc tạo ra các kẽ hở an ninh không mong muốn.
+    \item \textbf{Chi phí đầu tư và thay đổi văn hóa tổ chức:} Chuyển đổi ZTA là một quá trình dài hạn, đòi hỏi ngân sách đầu tư lớn cho các giải pháp phần mềm/hạ tầng mới (FIDO2, EDR, SIEM/SOAR) và thay đổi toàn bộ thói quen làm việc của nhân viên cũng như đội ngũ vận hành CNTT.
+\end{enumerate}
+
+
+
+
+\chapter{GIẢI PHÁP KỸ THUẬT ZERO TRUST NETWORK ACCESS (ZTNA)}
+\label{chap:chuong_3}
+
+% ==========================================
+% SECTION 3.1
+% ==========================================
+\section{Tổng quan về ZTNA và Khung kiến trúc SDP}
+\label{sec:3_1}
+
+\subsection{Khái niệm ZTNA -- Bản thương mại hóa của SDP}
+\label{subsec:3_1_1}
+
+Zero Trust Network Access (ZTNA) đại diện cho bước tiến hóa trong mô hình kiểm soát truy cập từ xa. ZTNA được xem là phiên bản thương mại hóa và ứng dụng thực tiễn của kiến trúc Chu vi được định nghĩa bằng phần mềm (\textit{Software-Defined Perimeter - SDP}). 
+
+Khác với các giải pháp mạng truyền thống cấp quyền truy cập ở cấp độ phân đoạn mạng, ZTNA tạo ra một ranh giới bảo mật logic, cô lập dựa trên định danh và ngữ cảnh thời gian thực. ZTNA thiết lập kết nối hẹp ở Tầng ứng dụng (Layer 7) trực tiếp giữa người dùng và ứng dụng cụ thể, loại bỏ hoàn toàn khả năng định tuyến tự do sang các tài nguyên khác trong hạ tầng doanh nghiệp.
+
+\subsection{Kiến trúc Software-Defined Perimeter (SDP) của Cloud Security Alliance}
+\label{subsec:3_1_2}
+
+Kiến trúc SDP do tổ chức Cloud Security Alliance (CSA) chuẩn hóa được thiết kế dựa trên nguyên lý triệt hạ sự hiện diện mạng công khai (\textit{Dark Cloud}). SDP ẩn hoàn toàn hạ tầng ứng dụng khỏi mạng Internet, biến các máy chủ ứng dụng thành vô hình đối với các công cụ dò quét rủi ro. 
+
+Mô hình SDP thực hiện phân tách triệt để giữa Mặt phẳng kiểm soát (\textit{Control Plane}) và Mặt phẳng dữ liệu (\textit{Data Plane}). Nhờ đó, việc xác thực định danh, đánh giá trạng thái an toàn của thiết bị và ra quyết định cấp quyền được hoàn tất hoàn toàn trên Mặt phẳng kiểm soát trước khi bất kỳ luồng lưu lượng ứng dụng nào được phép truyền tải trên Mặt phẳng dữ liệu.
+
+\subsection{Các thành phần cốt lõi trong mô hình SDP}
+\label{subsec:3_1_3}
+
+Khung kiến trúc SDP tiêu chuẩn bao gồm ba thành phần logic chính:
+
+\begin{itemize}
+    \item \textbf{SDP Controller (Bộ điều khiển):} Đóng vai trò là trung tâm ra quyết định trên Mặt phẳng kiểm soát. Controller tiếp nhận yêu cầu kết nối, xác thực định danh người dùng qua các nhà cung cấp định danh (IdP), kiểm tra điều kiện an toàn của thiết bị và đối chiếu chính sách truy cập. Controller chỉ phát chỉ thị cho điểm chấp nhận kết nối khi yêu cầu thỏa mãn toàn bộ tiêu chí an toàn.
+    \item \textbf{Initiating Host (IH -- Thiết bị khởi tạo):} Là thành phần chạy trên thiết bị đầu cuối của người dùng (dưới dạng Agent hoặc giao diện Trình duyệt). IH chịu trách nhiệm thu thập thông tin định danh, chứng thư số, thông số cấu hình và tình trạng an toàn hệ thống để gửi tới SDP Controller nhằm xin cấp quyền kết nối.
+    \item \textbf{Accepting Host (AH -- Thiết bị chấp nhận):} Đóng vai trò là điểm thực thi chính sách trên Mặt phẳng dữ liệu, nằm ngay trước các máy chủ ứng dụng. AH liên tục lắng nghe chỉ thị từ Controller và duy trì các kết nối đi ra (\textit{Outbound-only}). AH chỉ cho phép các gói tin mã hóa từ các IH đã qua xác thực truyền qua để truy cập ứng dụng đích.
+\end{itemize}
+
+% Hình 3.1: Sơ đồ kiến trúc SDP
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=2cm, auto, >=stealth,
+    box/.style={rectangle, draw=blue!70, fill=blue!5, thick, minimum width=3cm, minimum height=1cm, align=center, rounded corners=2pt},
+    plane/.style={draw=gray!50, dashed, fill=gray!5, inner sep=10pt, rounded corners=5pt}]
+
+    % Control Plane Box
+    \node [box] (controller) {\textbf{SDP Controller}\\(\textit{Control Plane})};
+    \node [box, left=3.5cm of controller] (idp) {\textbf{Identity Provider}\\(\textit{IdP / IAM})};
+    \node [box, right=3.5cm of controller] (edr) {\textbf{EDR / MDM}\\(\textit{Posture Check})};
+
+    % Data Plane Box
+    \node [box, below=2.5cm of controller] (gateway) {\textbf{Accepting Host (AH)}\\(\textit{ZTNA Gateway})};
+    \node [box, left=3.5cm of gateway] (ih) {\textbf{Initiating Host (IH)}\\(\textit{Client Agent})};
+    \node [box, right=3.5cm of gateway] (app) {\textbf{App Server}\\(\textit{Target Resource})};
+
+    % Connectors
+    \draw[<->, thick, dashed, blue] (ih) |- node[above, pos=0.25] {1. Xác thực \& Posture} (controller);
+    \draw[<->, thick, dashed] (controller) -- (idp);
+    \draw[<->, thick, dashed] (controller) -- (edr);
+    \draw[->, thick, red] (controller) -- node[right] {2. Chỉ thị cấp phép} (gateway);
+    \draw[->, thick, green!50!black] (ih) -- node[above] {3. Gói SPA \& mTLS} (gateway);
+    \draw[->, thick, green!50!black] (gateway) -- node[above] {4. Truy cập L7} (app);
+
+\end{tikzpicture}
+\caption{Mô hình Kiến trúc SDP phân tách Mặt phẳng Kiểm soát và Mặt phẳng Dữ liệu}
+\label{fig:sdp_architecture}
+\end{figure}
+
+% ==========================================
+% SECTION 3.2
+% ==========================================
+\section{Các cơ chế kỹ thuật nòng cốt của ZTNA}
+\label{sec:3_2}
+
+\subsection{Cơ chế "Dark Cloud" (Mạng ẩn) và nguyên lý Default Deny}
+\label{subsec:3_2_1}
+
+Cơ chế "Dark Cloud" áp dụng triết lý từ chối mặc định (\textit{Default Deny}). Trong mô hình này, các cổng dịch vụ đi vào (\textit{Inbound Ports}) trên hệ thống tường lửa biên và gateway đều được đóng hoàn toàn đối với lưu lượng truy cập công cộng. 
+
+Hạ tầng ứng dụng không phản hồi các gói tin thăm dò ICMP hoặc TCP SYN từ bên ngoài, khiến toàn bộ hệ thống hoàn toàn ẩn khỏi các công cụ rà quét cổng (\textit{Port Scanning}) và công cụ tìm kiếm lỗ hổng tự động. Bề mặt tấn công của doanh nghiệp được thu nhỏ về mức tối thiểu, ngăn ngừa các cuộc tấn công thăm dò và khai thác lỗ hổng Zero-day.
+
+\subsection{Xác thực trước gói tin (Single Packet Authorization -- SPA)}
+\label{subsec:3_2_2}
+
+Xác thực trước gói tin (SPA) là kỹ thuật mật mã hóa cho phép thiết bị khởi tạo (IH) chứng minh quyền truy cập hợp lệ tới thiết bị chấp nhận (AH) chỉ bằng một gói tin mã hóa duy nhất trước khi bất kỳ kết nối TCP/UDP nào được khởi tạo.
+
+\begin{enumerate}
+    \item \textbf{Khởi tạo và Mã hóa:} Khi người dùng yêu cầu truy cập, Client Agent đóng gói dữ liệu bao gồm: định danh người dùng, dấu thời gian (\textit{Timestamp}), địa chỉ IP nguồn và khóa OTP hoặc chữ ký số HMAC vào một gói tin UDP duy nhất.
+    \item \textbf{Kiểm tra thụ động:} AH vận hành ở chế độ lắng nghe thụ động (\textit{Passive Sniffing}) tại tầng liên kết dữ liệu mà không mở cổng lắng nghe giao thức TCP.
+    \item \textbf{Mở cổng động (\textit{Dynamic Pinholing}):} AH giải mã gói tin SPA và xác thực chữ ký số. Nếu gói tin hợp lệ, AH cập nhật tạm thời quy tắc tường lửa trong vài giây, cho phép duy nhất địa chỉ IP nguồn của Client thiết lập bắt tay TCP tới cổng ứng dụng. Mọi gói tin không chứa SPA hợp lệ đều bị silently dropped.
+\end{enumerate}
+
+\subsection{Xác thực TLS hai chiều (Mutual TLS -- mTLS)}
+\label{subsec:3_2_3}
+
+Khi cổng kết nối tạm thời được mở thông qua SPA, ZTNA thực thi cơ chế xác thực TLS hai chiều (mTLS) ở Tầng ứng dụng nhằm đảm bảo tính bảo mật và toàn vẹn của đường truyền:
+
+\begin{itemize}
+    \item \textbf{Xác thực hai chiều:} Khác với giao thức TLS thông thường (chỉ máy chủ xuất trình chứng thư), mTLS bắt buộc cả Client và ZTNA Gateway phải xuất trình chứng thư số X.509 hợp lệ do Hạ tầng khóa công khai (\textit{PKI}) của doanh nghiệp cấp phát.
+    \item \textbf{Mã hóa End-to-End:} Kênh truyền mã hóa mTLS ngăn chặn triệt để các cuộc tấn công nghe lén, giả mạo thiết bị và tấn công đứng giữa (\textit{Man-in-the-Middle}).
+\end{itemize}
+
+\subsection{Động cơ đánh giá tin cậy động (Trust Engine) và Kiểm soát truy cập ABAC}
+\label{subsec:3_2_4}
+
+Động cơ đánh giá tin cậy động (\textit{Continuous Adaptive Trust Engine}) đóng vai trò là bộ não phân tích rủi ro của ZTNA Controller:
+
+\begin{itemize}
+    \item \textbf{Mô hình kiểm soát ABAC (\textit{Attribute-Based Access Control}):} Thay vì phân quyền tĩnh theo vai trò (RBAC), ZTNA áp dụng mô hình ABAC đánh giá linh hoạt dựa trên tổ hợp thuộc tính: Thuộc tính định danh, Thuộc tính thiết bị, Thuộc tính môi trường mạng và Thuộc tính tài nguyên.
+    \item \textbf{Thuật toán tính toán điểm tin cậy thời gian thực:} Trust Engine liên tục tính toán điểm số tin cậy $T_{\text{score}}$ biến đổi dựa trên dữ liệu tổng hợp từ IdP, EDR, MDM và SIEM. Nếu điểm $T_{\text{score}}$ giảm xuống dưới ngưỡng an toàn quy định cho ứng dụng nhạy cảm $R_k$, hệ thống sẽ ngay lập tức yêu cầu xác thực bổ sung (MFA) hoặc hạ cấp quyền truy cập.
+\end{itemize}
+
+% ==========================================
+% SECTION 3.3
+% ==========================================
+\section{Phân loại các mô hình kiến trúc ZTNA}
+\label{sec:3_3}
+
+\subsection{Client-initiated ZTNA (Dựa trên Agent) và Quy trình kiểm tra Device Posture}
+\label{subsec:3_3_1}
+
+Mô hình này yêu cầu cài đặt ứng dụng Agent chuyên dụng trên thiết bị đầu cuối của người dùng.
+
+\begin{itemize}
+    \item \textbf{Nguyên lý hoạt động và Thu thập Device Posture:} Agent chạy ngầm trên thiết bị, liên tục thu thập các thông số kỹ thuật về tình trạng an toàn của hệ thống (\textit{Device Posture}) bao gồm: phiên bản hệ điều hành, trạng thái cập nhật bản vá, tình trạng mã hóa ổ đĩa (BitLocker/FileVault) và chỉ số từ phần mềm EDR/Antivirus. Các dữ liệu này được đính kèm vào yêu cầu xác thực gửi tới Controller.
+    \item \textbf{Ưu điểm:} Hỗ trợ toàn diện mọi giao thức mạng (HTTP/HTTPS, SSH, RDP, SMB, UDP/TCP tùy biến); có khả năng đánh giá sâu và liên tục tình trạng an toàn thiết bị đầu cuối.
+    \item \textbf{Nhược điểm:} Tăng độ phức tạp trong công tác quản trị và triển khai Agent trên diện rộng; không phù hợp áp dụng cho thiết bị cá nhân của nhân viên (BYOD) hoặc lực lượng lao động tạm thời/nhà thầu.
+    \item \textbf{Trường hợp áp dụng:} Lực lượng nhân viên chính thức sử dụng máy tính do công ty cấp (\textit{Corporate-managed Devices}) cần truy cập vào các ứng dụng nội bộ đa giao thức.
+\end{itemize}
+
+\subsection{Service-initiated ZTNA (Agentless / Reverse Proxy)}
+\label{subsec:3_3_2}
+
+Mô hình Agentless sử dụng công nghệ Máy chủ ủy nhiệm ngược (\textit{Reverse Proxy / Identity-Aware Proxy}) kết hợp với các trình duyệt web tiêu chuẩn.
+
+\begin{itemize}
+    \item \textbf{Nguyên lý kết nối Outbound-only:} Một ZTNA Connector/Broker đặt tại trung tâm dữ liệu nội bộ sẽ chủ động mở và duy trì kênh kết nối đi ra (\textit{Outbound Connection}) tới ZTNA Cloud Service. Khi người dùng truy cập vào ứng dụng qua cổng Web, ZTNA Cloud Service xác thực định danh qua SSO/IdP và bắc cầu luồng dữ liệu về Connector nội bộ mà không cần mở cổng vào trên tường lửa doanh nghiệp.
+    \item \textbf{Ưu điểm:} Triển khai tức thì, không yêu cầu cài đặt bất kỳ phần mềm nào trên máy trạm; tương thích hoàn hảo với các mô hình thiết bị cá nhân (BYOD) và đối tác bên ngoài.
+    \item \textbf{Nhược điểm:} Bị giới hạn bởi các giao thức hỗ trợ trên trình duyệt web (chủ yếu là HTTP/HTTPS, SSH/RDP qua HTML5 terminal); khả năng kiểm tra tình trạng an toàn thiết bị bị hạn chế.
+    \item \textbf{Trường hợp áp dụng:} Cấp quyền truy cập cho nhà thầu bên thứ ba, tư vấn viên hoặc nhân viên sử dụng thiết bị cá nhân (BYOD) truy cập vào các ứng dụng chuẩn Web.
+\end{itemize}
+
+\subsection{Các mô hình phân bổ hạ tầng (Cloud-Managed Broker vs. On-Premises Gateway)}
+\label{subsec:3_3_3}
+
+Giải pháp ZTNA có thể được phân bổ linh hoạt theo ba dạng kiến trúc triển khai thực tế:
+
+\begin{itemize}
+    \item \textbf{Mô hình Đám mây thuần túy (Cloud-Managed Broker / SaaS ZTNA):} Controller và Gateway nằm hoàn toàn trên hạ tầng Đám mây toàn cầu của nhà cung cấp giải pháp. Mô hình này tối ưu hóa định tuyến lưu lượng trực tiếp (\textit{Direct-to-App}), giảm thiểu độ trễ cho người dùng toàn cầu.
+    \item \textbf{Mô hình Cục bộ (On-Premises / Private ZTNA):} Controller và Gateway được cài đặt hoàn toàn trong Trung tâm dữ liệu nội bộ của doanh nghiệp. Mô hình này phù hợp với các tổ chức có yêu cầu nghiêm ngặt về chủ quyền dữ liệu như Ngân hàng, Tài chính, Quốc phòng và Cơ quan Nhà nước.
+    \item \textbf{Mô hình Lai (Hybrid ZTNA):} Mặt phẳng kiểm soát (Controller) được quản lý tập trung trên Đám mây, trong khi Mặt phẳng dữ liệu (Gateway/Connector) được phân bổ linh hoạt tại cả Trung tâm dữ liệu nội bộ và các nền tảng Đa đám mây.
+\end{itemize}
+
+% ==========================================
+% SECTION 3.4
+% ==========================================
+\section{Phân tích chi tiết Luồng dữ liệu (Data Flow) trong ZTNA}
+\label{sec:3_4}
+
+\subsection{Quy trình 4 bước khởi tạo và bắc cầu kết nối Tầng 7}
+\label{subsec:3_4_1}
+
+Quy trình xử lý luồng dữ liệu từ khi người dùng khởi tạo yêu cầu đến khi thiết lập kênh truyền thông an toàn trong ZTNA trải qua 4 bước nối tiếp:
+
+\begin{enumerate}
+    \item \textbf{Bước 1: Khởi tạo yêu cầu và Kiểm tra trạng thái thiết bị (Device Posture Check):}
+    Người dùng khởi tạo yêu cầu truy cập tới một ứng dụng doanh nghiệp. ZTNA Agent trên máy trạm chặn yêu cầu này, thực hiện thu thập dữ liệu về tình trạng an toàn của thiết bị (mã hóa ổ đĩa, trạng thái EDR, phiên bản OS) và tổng hợp thành tệp dữ liệu ngữ cảnh.
+
+    \item \textbf{Bước 2: Gửi gói SPA và Xác thực định danh tại ZTNA Controller:}
+    Agent đóng gói thông tin ngữ cảnh và gửi gói tin SPA mã hóa tới ZTNA Controller trên Mặt phẳng kiểm soát. Controller tiến hành xác thực định danh người dùng thông qua hệ thống IdP (thực thi MFA chống lừa đảo), đồng thời đánh giá tình trạng an toàn thiết bị. Nếu đạt yêu cầu chính sách, Controller phát một mã ủy quyền có thời hạn ngắn (\textit{Short-lived Session Token}).
+
+    \item \textbf{Bước 3: Điều khiển thực thi và Cấu hình ZTNA Gateway:}
+    ZTNA Controller gửi chỉ thị điều khiển tới ZTNA Gateway nằm ở Mặt phẳng dữ liệu. Gateway dựa trên chỉ thị này để cấu hình quy tắc tường lửa động (\textit{Dynamic Pinholing}), chỉ mở cổng cho đúng IP nguồn của phiên trong thời gian ngắn.
+
+    \item \textbf{Bước 4: Thiết lập kênh kết nối bắc cầu Tầng 7 (Application Bridging):}
+    ZTNA Gateway thiết lập đường truyền mã hóa mTLS với Client Agent, đồng thời ghép nối với kết nối Outbound duy trì sẵn từ ZTNA Connector nội bộ. Kết nối bắc cầu ở Tầng ứng dụng (Layer 7) được hoàn tất, cho phép người dùng trao đổi dữ liệu an toàn với duy nhất ứng dụng đích được chỉ định.
+\end{enumerate}
+
+% Hình 3.2: Sơ đồ luồng dữ liệu 4 bước
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=3.8cm, % Tăng khoảng cách giữa các ô từ 2.8cm lên 3.8cm
+    auto, 
+    >=stealth,
+    actor/.style={rectangle, draw=blue!80, fill=blue!10, thick, minimum width=2.2cm, minimum height=0.8cm, align=center},
+    line/.style={draw, ->, thick}
+]
+
+    % Nodes
+    \node [actor] (client) {\textbf{Client / Agent}};
+    \node [actor, right=of client] (controller) {\textbf{ZTNA Controller}};
+    \node [actor, right=of controller] (gateway) {\textbf{ZTNA Gateway}};
+    \node [actor, right=of gateway] (app) {\textbf{Target App}};
+
+    % Sequential Flow (Thêm yshift để đẩy chữ lên/xuống khỏi viền mũi tên)
+    \draw[->, thick, blue] (client) -- node[above, font=\footnotesize, yshift=2pt] {1. Posture Check \& SPA} (controller);
+    \draw[->, thick, red] (controller) -- node[above, font=\footnotesize, yshift=2pt] {2. Rule Pinholing} (gateway);
+    \draw[->, thick, green!50!black] (client) to[bend right=30] node[below, font=\footnotesize, yshift=-3pt] {3. Đường hầm mTLS (Layer 7)} (gateway);
+    \draw[->, thick, green!50!black] (gateway) -- node[above, font=\footnotesize, yshift=2pt] {4. Forward Req} (app);
+
+\end{tikzpicture}%
+}
+\caption{Sơ đồ Chuỗi Tiến trình Luồng dữ liệu 4 bước trong Kết nối ZTNA}
+\label{fig:ztna_data_flow}
+\end{figure}
+
+\subsection{Cơ chế giám sát liên tục và thu hồi phiên tức thì (Continuous Enforcement)}
+\label{subsec:3_4_2}
+
+Không giống như các giải pháp truyền thống chỉ kiểm tra một lần tại thời điểm đăng nhập, ZTNA duy trì cơ chế đánh giá liên tục trong suốt chu kỳ sống của phiên kết nối:
+
+\begin{itemize}
+    \item \textbf{Thu thập Telemetry thực thời:} ZTNA Controller liên tục nhận các luồng dữ liệu giám sát từ Agent và hệ thống EDR/SIEM.
+    \item \textbf{Kích hoạt công tắc ngắt khẩn cấp (Kill-Switch):} Nếu thiết bị đầu cuối phát sinh dấu hiệu bất thường (ví dụ: EDR phát hiện mã độc thực thi, người dùng thay đổi IP/vị trí địa lý đột ngột, hoặc chứng thư bị thu hồi), Controller lập tức phát lệnh thu hồi \textit{Session Token} xuống ZTNA Gateway.
+    \item \textbf{Đóng ngắt phiên tức thì:} ZTNA Gateway hủy bỏ đường hầm mã hóa mTLS/Reverse Tunnel ngay tại thời điểm thực thời, cô lập thiết bị khỏi ứng dụng mà không ảnh hưởng đến các phiên kết nối khác trong hệ thống.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{SO SÁNH CHUYÊN SÂU ZTNA VÀ CÁC GIẢI PHÁP TRUYỀN THỐNG}
+\label{chap:chuong_4}
+
+% ==========================================
+% SECTION 4.1
+% ==========================================
+\section{So sánh về Kiến trúc và Tầng hoạt động (Layer 3/4 vs Layer 7)}
+\label{sec:4_1}
+
+\subsection{Cơ chế cấp quyền ở Tầng Mạng/Giao vận (Layer 3/4) trong VPN truyền thống}
+\label{subsec:4_1_1}
+
+Giải pháp Mạng riêng ảo (VPN) được thiết kế dựa trên triết lý bảo mật chu vi cổ điển, dựa vào ranh giới địa lý hoặc phân đoạn IP để xác định độ tin cậy. Khi người dùng thiết lập kết nối VPN thành công (thông qua giao thức IPsec hoặc SSL/TLS VPN), hệ thống khởi tạo một giao diện mạng ảo (\textit{Virtual Network Interface - TUN/TAP}) trên thiết bị đầu cuối và cấp cho thiết bị một địa chỉ IP nội bộ thuộc dải Subnet của doanh nghiệp.
+
+Về bản chất, VPN hoạt động ở Tầng Mạng (\textit{Layer 3}) hoặc Tầng Giao vận (\textit{Layer 4}) trong mô hình OSI:
+
+\begin{itemize}
+    \item \textbf{Cấu trúc Giao hầm IPsec/SSL (IP Tunneling Mechanics):} VPN thực hiện đóng gói toàn bộ gói tin IP (\textit{IP-in-IP Encapsulation}). Gói tin IP gốc từ thiết bị người dùng (chứa IP nguồn nội bộ và IP đích nội bộ) được mã hóa và bọc bên trong một tiêu đề IP công cộng (\textit{Outer IP Header}) để truyền qua Internet. Khi tới VPN Concentrator tại trung tâm dữ liệu, tiêu đề ngoài bị bóc tách và gói tin IP gốc được đẩy thẳng vào mạng LAN.
+    \item \textbf{Khả năng định tuyến toàn phân đoạn (Subnet Routing):} Ngay khi giao hầm kết nối được thiết lập, phần mềm VPN Client sẽ can thiệp vào bảng định tuyến (\textit{Routing Table}) của hệ điều hành, thêm các tuyến đường (\textit{Routes}) hướng toàn bộ luồng dữ liệu về giao diện TUN/TAP. Thiết bị người dùng trở thành một nút mạng (\textit{Node}) chính thức trong dải Subnet nội bộ, có khả năng phát các gói tin ARP, ICMP, và truyền thông điệp IP tự do tới các địa chỉ lân cận.
+    \item \textbf{Cấp quyền theo dải IP và Cổng (IP/Port-based ACLs):} Việc kiểm soát truy cập trên VPN phụ thuộc hoàn toàn vào quy tắc Tường lửa (\textit{Firewall Access Control Lists}) dựa trên bộ 5 tham số (\textit{5-tuple}): địa chỉ IP nguồn, địa chỉ IP đích, cổng nguồn, cổng đích và giao thức. Mô hình này hoàn toàn "mù" về mặt ngữ cảnh ứng dụng (\textit{Application-unaware}). Nếu mở quyền IP cho một máy chủ, người dùng có thể tiếp cận mọi dịch vụ chạy trên máy chủ đó (HTTP cổng 80, SSH cổng 22, RDP cổng 3389, SMB cổng 445).
+\end{itemize}
+
+\subsection{Cơ chế cấp quyền ở Tầng Ứng dụng (Layer 7) trong ZTNA}
+\label{subsec:4_1_2}
+
+Khác biệt hoàn toàn với VPN, ZTNA dịch chuyển điểm kiểm soát lên Tầng Ứng dụng (\textit{Layer 7}). ZTNA loại bỏ khái niệm "đưa thiết bị vào mạng nội bộ" và thay thế bằng cơ chế bắc cầu ứng dụng có điều kiện (\textit{Application Bridging}).
+
+\begin{itemize}
+    \item \textbf{Cô lập hoàn toàn với Tầng Mạng (L3 Network Isolation):} Trong mô hình ZTNA, thiết bị đầu cuối không bao giờ được cấp địa chỉ IP nội bộ và không nhận bất kỳ tuyến định tuyến IP nào vào hạ tầng doanh nghiệp. Bảng định tuyến của hệ điều hành không bị thay đổi. Thiết bị bị cô lập hoàn toàn khỏi giao thức ARP, ICMP, và các lưu lượng Quảng bá/Đa hướng (\textit{Broadcast/Multicast}) của mạng LAN.
+    \item \textbf{Chu vi vi mô từng ứng dụng (Per-Application Micro-Perimeter):} ZTNA thiết lập một kênh giao tiếp điểm-nối-điểm (\textit{Point-to-Point}) được mã hóa hẹp, chỉ gắn liền với duy nhất tiến trình (\textit{Process}) hoặc ứng dụng được chỉ định. ZTNA Gateway chỉ chuyển tiếp duy nhất các luồng dữ liệu HTTP/HTTPS hoặc SSH/RDP dành riêng cho Tên miền dịch vụ (\textit{Fully Qualified Domain Name - FQDN}) đã được phê duyệt.
+    \item \textbf{Cơ chế Ủy nhiệm nhận biết Định danh (Identity-Aware L7 Proxying):} ZTNA Connector đóng vai trò là một L7 Reverse Proxy. Connector chấm dứt phiên TCP/TLS từ phía Client, bóc tách tiêu đề L7 để kiểm tra và xác thực từng yêu cầu HTTP/giao thức, đối chiếu mã thông báo ủy quyền (\textit{Session Token}) trước khi tạo một kết nối nội bộ mới tới máy chủ ứng dụng.
+\end{itemize}
+
+\subsection{Phân tích So sánh giữa Mô hình Định tuyến và Mô hình Ủy nhiệm L7}
+\label{subsec:4_1_3}
+
+Sự khác biệt về tầng hoạt động dẫn đến hai triết lý kiểm soát truy cập đối lập:
+
+\begin{itemize}
+    \item \textbf{Mô hình Định tuyến (Routing Model - VPN):} Dựa trên việc chuyển tiếp gói tin (\textit{Packet Forwarding}). Tường lửa và VPN Concentrator đóng vai trò là các bộ định tuyến L3/L4. Một khi gói tin vượt qua khâu kiểm tra ACL ban đầu, nó được tự do di chuyển qua các hạ tầng mạng trung gian để tới đích mà không chịu sự kiểm tra nội dung L7 liên tục.
+    \item \textbf{Mô hình Ủy nhiệm (Proxy/Broker Model - ZTNA):} Dựa trên việc ngắt đoạn và thiết lập lại kết nối (\textit{Connection Termination \& Re-origination}). ZTNA Gateway chấm dứt phiên kết nối TCP/TLS từ Client, kiểm tra tính hợp lệ của ngữ cảnh L7, và sau đó khởi tạo một phiên kết nối nội bộ hoàn toàn mới từ ZTNA Connector tới máy chủ ứng dụng. Hai không gian mạng (Client-side và Server-side) được tách biệt hoàn toàn về mặt logic lẫn vật lý.
+\end{itemize}
+
+Sự khác biệt cốt lõi giữa hai mô hình chính là: VPN mở rộng chu vi mạng đến thiết bị người dùng, còn ZTNA thu hẹp chu vi bảo mật về đúng ứng dụng đích.
+
+% ==========================================
+% SECTION 4.2
+% ==========================================
+\section{So sánh Bề mặt tấn công, Mô hình đe dọa và An toàn thông tin}
+\label{sec:4_2}
+
+\subsection{Phân tích Di chuyển ngang (Lateral Movement) theo Chuỗi tấn công MITRE ATT\&CK}
+\label{subsec:4_2_1}
+
+Nguy cơ di chuyển ngang là điểm yếu nguy hiểm nhất của kiến trúc VPN truyền thống khi đối mặt với các cuộc tấn công APT hoặc mã độc tống tiền (Ransomware):
+
+\begin{itemize}
+    \item \textbf{Chuỗi xâm nhập qua VPN (VPN Kill Chain):}
+    \begin{enumerate}
+        \item \textit{Thâm nhập ban đầu (Initial Access):} Kẻ tấn công chiếm tài khoản VPN qua Phishing, Credential Stuffing hoặc khai thác lỗ hổng thiết bị VPN.
+        \item \textit{Thăm dò nội bộ (Discovery - T1046):} Khi kết nối VPN được lập, kẻ tấn công thực hiện quét dải Subnet nội bộ (`nmap -sP 192.168.1.0/24`), phát hiện các máy chủ active, các cổng dịch vụ mở và các dịch vụ Active Directory/Domain Controller.
+        \item \textit{Di chuyển sang ngang (Lateral Movement - T1210):} Kẻ tấn công lợi dụng các giao thức quản trị như SMB (Port 445), RDP (Port 3389), WMI hoặc SSH để lây nhiễm chéo sang các máy chủ lân cận, khai thác lỗ hổng như EternalBlue hay ZeroLogon.
+    \end{enumerate}
+    
+    \item \textbf{Khả năng triệt tiêu di chuyển ngang của ZTNA:} Do ZTNA không cấp kết nối ở tầng IP, thiết bị của người dùng hoàn toàn không thể "nhìn thấy" hoặc giao tiếp với các thiết bị khác trong cùng Trung tâm dữ liệu. Lệnh `ping`, `traceroute`, hay quét dải IP nội bộ đều thất bại do không có tuyến định tuyến L3. Bán kính thiệt hại (\textit{Blast Radius}) được giới hạn tuyệt đối trong duy nhất ứng dụng được phân quyền.
+\end{itemize}
+
+\subsection{Khả năng triệt tiêu tấn công Quét cổng (Port Scanning) và Thăm dò lỗ hổng}
+\label{subsec:4_2_2}
+
+\begin{itemize}
+    \item \textbf{Bề mặt hiển thị của VPN:} VPN Concentrator bắt buộc phải mở các cổng kết nối công khai ra Internet (cổng 443 cho SSL-VPN, cổng 500/4500 cho IPsec). Các cổng này liên tục bị quét bởi các cỗ máy như Shodan, Censys. Khi xuất hiện lỗ hổng Zero-day trên thiết bị VPN (như các lỗ hổng RCE nổi tiếng trên Fortinet, Pulse Secure, Palo Alto), kẻ tấn công có thể khai thác trực tiếp từ Internet mà không cần qua bước xác thực ban đầu.
+    \item \textbf{Cơ chế Mạng ẩn (Dark Cloud) trong ZTNA:} ZTNA áp dụng triết lý đóng toàn bộ cổng đi vào (\textit{Zero Inbound Open Ports}). Các máy chủ ứng dụng và ZTNA Connector nằm hoàn toàn đằng sau tường lửa ở chế độ `Default Deny`. ZTNA Connector chỉ chủ động mở các kết nối đi ra (\textit{Outbound-only connections}) tới ZTNA Cloud Broker. Khi kẻ tấn công thực hiện quét TCP SYN hoặc ICMP ping tới IP công cộng của doanh nghiệp, hệ thống hoàn toàn ngắt kết nối và không phản hồi, khiến hạ tầng trở nên "vô hình".
+\end{itemize}
+
+\subsection{Phòng chống tấn công Từ chối dịch vụ (DDoS) và Tấn công đứng giữa (MitM)}
+\label{subsec:4_2_3}
+
+\begin{itemize}
+    \item \textbf{Phòng chống tấn công DDoS:} Hạ tầng VPN tập trung tại Trung tâm dữ liệu chính (HQ) dễ dàng trở thành mục tiêu của các cuộc tấn công DDoS làm cạn kiệt băng thông hoặc tài nguyên xử lý (SYN Flood, SSL Handshake Flood). Trái lại, ZTNA tận dụng hạ tầng Đám mây phân tán toàn cầu (Cloud Edge Network). Lưu lượng tấn công DDoS bị hấp thụ và triệt tiêu ngay tại các nút Edge gần nguồn phát nhất trước khi chạm tới hạ tầng doanh nghiệp.
+    \item \textbf{Phòng chống tấn công Man-in-the-Middle (MitM):} VPN truyền thống thường khó kiểm soát triệt để tính hợp lệ của chứng thư trên máy trạm. ZTNA bắt buộc áp dụng giao thức mTLS (Mutual TLS), trong đó cả Client và Gateway đều phải xác minh chứng thư X.509 hai chiều ở cấp độ mã hóa phần cứng (TPM/Secure Enclave), vô hiệu hóa hoàn toàn nguy cơ giả mạo Gateway hoặc nghe lén.
+\end{itemize}
+
+% ==========================================
+% SECTION 4.3
+% ==========================================
+\section{So sánh Hiệu năng, Trải nghiệm và Quản trị Vận hành}
+\label{sec:4_3}
+
+\subsection{Mô hình hóa Toán học Độ trễ và Hiện tượng Nghẽn cổ chai (Hairpinning)}
+\label{subsec:4_3_1}
+
+Trong bối cảnh doanh nghiệp chuyển dịch sang sử dụng các ứng dụng Điện toán đám mây (SaaS như Microsoft 365, Salesforce), kiến trúc VPN bộc lộ suy giảm hiệu năng nghiêm trọng do hiện tượng "Vòng ngược luồng dữ liệu" (\textit{Traffic Hairpinning / Backhauling}).
+
+\begin{itemize}
+    \item \textbf{Mô hình độ trễ trong VPN ($T_{\text{VPN}}$):} Khi người dùng truy cập ứng dụng SaaS qua VPN, lưu lượng bị đóng hầm kéo về Trung tâm dữ liệu chính (HQ) để kiểm tra qua Tường lửa NGFW rồi mới đẩy ra Internet. Tổng độ trễ truyền tải được tính bằng công thức:
+    \begin{equation}
+        T_{\text{VPN}} = T_{\text{Client} \to \text{HQ}} + T_{\text{Inspection}} + T_{\text{HQ} \to \text{SaaS}} + T_{\text{SaaS} \to \text{HQ}} + T_{\text{HQ} \to \text{Client}}
+    \end{equation}
+    Đường đi vòng này làm tăng gấp đôi quãng đường truyền dẫn mạng, làm tăng biến động độ trễ (\textit{Jitter}) và gây tắc nghẽn băng thông WAN tại HQ.
+
+    \item \textbf{Mô hình độ trễ trong ZTNA ($T_{\text{ZTNA}}$):} ZTNA ứng dụng cơ chế Định tuyến trực tiếp tối ưu (\textit{Direct-to-App Routing}). Client kết nối tới Nút Edge Cloud gần nhất qua IP Anycast:
+    \begin{equation}
+        T_{\text{ZTNA}} = T_{\text{Client} \to \text{Edge}} + T_{\text{Edge\_Inspection}} + T_{\text{Edge} \to \text{SaaS}}
+    \end{equation}
+    Do $T_{\text{Client} \to \text{Edge}} \ll T_{\text{Client} \to \text{HQ}}$, tổng thời gian đáp ứng của ZTNA giảm từ $40\%$ đến $60\%$ so với VPN, tối ưu hóa cho các dịch vụ thời gian thực như VoIP và Video Conferencing.
+\end{itemize}
+
+\subsection{Định tuyến luồng dữ liệu tối ưu qua Cloud Edge}
+\label{subsec:4_3_2}
+
+ZTNA phân tách rõ ràng luồng lưu lượng thông qua kỹ thuật Phân luồng thông minh (\textit{Native Split-Tunneling}):
+
+\begin{itemize}
+    \item \textbf{Lưu lượng Internet/SaaS công cộng:} Đẩy trực tiếp từ máy trạm ra Internet dưới sự kiểm soát chính sách của SWG/CASB tại Cloud Edge.
+    \item \textbf{Lưu lượng Ứng dụng Nội bộ:} Được mã hóa và định tuyến qua đường hầm ZTNA Connector về Trung tâm dữ liệu. Phương pháp này giải phóng hoàn toàn băng thông cho mạng WAN doanh nghiệp.
+\end{itemize}
+
+\subsection{Độ phức tạp Quản trị Chính sách, Khả năng mở rộng và Chi phí (CAPEX/OPEX)}
+\label{subsec:4_3_3}
+
+\begin{itemize}
+    \item \textbf{Độ phức tạp chính sách ($O(N)$ vs $O(N \times M)$):} Trong hệ thống VPN, việc duy trì chính sách dựa trên IP/Subnet dẫn đến sự bùng nổ số lượng quy tắc tường lửa ($O(N \times M)$ với $N$ người dùng và $M$ phân đoạn mạng). Đối với ZTNA, chính sách dựa trên thuộc tính ABAC gắn liền với định danh tập trung, giúp giảm độ phức tạp quản trị về mức $O(N + M)$.
+    \item \textbf{Khả năng mở rộng và Chi phí:} Mở rộng VPN đòi hỏi mua thêm thiết bị phần cứng VPN Concentrator đắt đỏ (chi phí CAPEX) và nâng cấp băng thông Leased-line. ZTNA chuyển đổi toàn bộ sang mô hình Đám mây (\textit{Cloud-native}), hỗ trợ tự động mở rộng quy mô (\textit{Auto-scaling}) theo nhu cầu thực tế (chuyển dịch sang chi phí vận hành OPEX).
+\end{itemize}
+
+\subsection{Bảng tổng hợp so sánh tiêu chí kỹ thuật toàn diện}
+\label{subsec:4_3_4}
+
+Bảng \ref{tab:ztna_vs_vpn_comprehensive} đối chiếu tổng thể các tiêu chí kỹ thuật cốt lõi giữa VPN truyền thống và ZTNA:
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng đối chiếu tiêu chí kỹ thuật giữa VPN truyền thống và giải pháp ZTNA}
+\label{tab:ztna_vs_vpn_comprehensive}
+\small
+\begin{tabular}{|p{3.2cm}|p{5.5cm}|p{5.5cm}|}
+\hline
+\textbf{Tiêu chí So sánh} & \textbf{Mạng riêng ảo (VPN Truyền thống)} & \textbf{Giải pháp ZTNA (Zero Trust)} \\ \hline
+\textbf{Tầng hoạt động OSI} & Tầng Mạng / Giao vận (Layer 3 / Layer 4). & Tầng Ứng dụng (Layer 7). \\ \hline
+\textbf{Mô hình kết nối} & Định tuyến tập trung về HQ (\textit{Hub-and-Spoke}). & Ủy nhiệm ứng dụng L7 (\textit{Application Proxy}). \\ \hline
+\textbf{Phạm vi cấp quyền} & Cấp quyền theo dải IP / Subnet mạng nội bộ. & Cấp quyền đích danh từng ứng dụng (\textit{Per-App}). \\ \hline
+\textbf{Trạng thái cổng kết nối} & Mở cổng Inbound công khai (443/500/4500). & Đóng toàn bộ cổng vào (\textit{Outbound-only}). \\ \hline
+\textbf{Bề mặt hiển thị} & Lộ diện IP và Cổng dịch vụ ra Internet. & Mạng ẩn hoàn toàn (\textit{Dark Cloud}). \\ \hline
+\textbf{Di chuyển ngang} & Rất cao. Nguy cơ lây nhiễm toàn bộ LAN. & Bằng không. Người dùng bị cô lập L3. \\ \hline
+\textbf{Xác thực thiết bị} & Kiểm tra một lần khi khởi tạo phiên kết nối. & Đánh giá tin cậy liên tục (\textit{Continuous Verification}). \\ \hline
+\textbf{Mô hình Định tuyến} & Kéo lưu lượng về HQ (\textit{Traffic Hairpinning}). & Định tuyến trực tiếp tới Edge (\textit{Direct-to-App}). \\ \hline
+\textbf{Độ phức tạp Chính sách} & Cao ($O(N \times M)$ quy tắc Tường lửa tĩnh). & Thấp ($O(N + M)$ quy tắc ABAC định danh). \\ \hline
+\textbf{Khả năng mở rộng} & Bị giới hạn bởi phần cứng thiết bị (CAPEX). & Mở rộng linh hoạt trên Đám mây (OPEX). \\ \hline
+\end{tabular}
+\end{table}
+
+% ==========================================
+% SECTION 4.4
+% ==========================================
+\section{Đánh giá Tổng quan và Định hướng Áp dụng}
+\label{sec:4_4}
+
+\subsection{Tổng hợp các Đánh giá Cốt lõi giữa VPN và ZTNA}
+\label{subsec:4_4_1}
+
+Qua phân tích đối chiếu chuyên sâu về kiến trúc, bề mặt tấn công và hiệu năng vận hành, có thể rút ra các đánh giá tổng quan mang tính bản chất như sau:
+
+\begin{enumerate}
+    \item \textbf{Tính tất yếu của sự chuyển dịch:} Sự sụp đổ của ranh giới mạng vật lý cổ điển khiến triết lý "Tin tưởng nhưng Kiểm tra" trên VPN không còn đáp ứng được yêu cầu bảo mật trong môi trường Đa đám mây và Làm việc linh hoạt. ZTNA là câu trả lời kỹ thuật chuẩn hóa dựa trên triết lý "Không tin tưởng bất kỳ ai, Luôn luôn xác thực".
+    \item \textbf{Ưu thế vượt trội về An toàn thông tin:} Bằng cách dịch chuyển điểm kiểm soát lên Tầng Ứng dụng (L7) và áp dụng cơ chế Mạng ẩn (\textit{Dark Cloud}), ZTNA triệt tiêu hai nguy cơ bảo mật lớn nhất của VPN là **Di chuyển sang ngang (\textit{Lateral Movement})** khi bị chiếm quyền điều khiển và **Thăm dò khai thác lỗ hổng Zero-day** trên các cổng Inbound mở công khai.
+    \item \textbf{Cải thiện Hiệu năng và Trải nghiệm Người dùng:} ZTNA loại bỏ điểm nghẽn "Vòng ngược luồng dữ liệu" (\textit{Hairpinning}) của VPN, cho phép định tuyến trực tiếp từ máy trạm tới Nút Edge gần nhất, giúp giảm đáng kể độ trễ truyền tải cho các ứng dụng thời gian thực và SaaS.
+\end{enumerate}
+
+\subsection{Những Thách thức và Định hướng Chuyển đổi Thực tế}
+\label{subsec:4_4_2}
+
+Dù mang lại nhiều ưu điểm vượt trội, việc thay thế hoàn toàn hệ thống VPN bằng ZTNA trong thực tế doanh nghiệp vẫn đòi hỏi lộ trình cân nhắc toàn diện:
+
+\begin{itemize}
+    \item \textbf{Bài toán Tương thích Ứng dụng Cũ (Legacy Apps):} Mô hình Service-initiated (Clientless ZTNA) bị giới hạn bởi các giao thức chuẩn Web. Đối với các ứng dụng cũ sử dụng giao thức Proprietary TCP/UDP hoặc yêu cầu kết nối L3 trực tiếp, doanh nghiệp bắt buộc phải áp dụng mô hình Client-initiated (Agent-based ZTNA) hoặc duy trì giải pháp song song trong giai đoạn chuyển tiếp.
+    \item \textbf{Phụ thuộc vào Hạ tầng Định danh (IAM):} ZTNA lấy định danh làm trung tâm. Việc triển khai ZTNA chỉ thực sự hiệu quả khi doanh nghiệp đã chuẩn hóa kho định danh tập trung (Active Directory/LDAP), hỗ trợ SSO và thực thi MFA chống lừa đảo.
+    \item \textbf{Định hướng Lộ trình Chuyển đổi:} Doanh nghiệp nên tiếp cận theo mô hình cuốn chiếu: Bắt đầu từ việc cấp quyền cho các bên thứ ba/nhà thầu thông qua Clientless ZTNA, sau đó áp dụng Agent-based ZTNA cho lực lượng nhân viên làm việc từ xa, và tiến tới ngưng vận hoàn toàn hệ thống VPN truyền thống.
+\end{itemize}
+\end{document}
