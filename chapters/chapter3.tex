@@ -1,0 +1,216 @@
+\chapter{GIẢI PHÁP KỸ THUẬT ZERO TRUST NETWORK ACCESS (ZTNA)}
+\label{chap:chuong_3}
+
+% ==========================================
+% SECTION 3.1
+% ==========================================
+\section{Tổng quan về ZTNA và Khung kiến trúc SDP}
+\label{sec:3_1}
+
+\subsection{Khái niệm ZTNA -- Bản thương mại hóa của SDP}
+\label{subsec:3_1_1}
+
+Zero Trust Network Access (ZTNA) đại diện cho bước tiến hóa trong mô hình kiểm soát truy cập từ xa. ZTNA được xem là phiên bản thương mại hóa và ứng dụng thực tiễn của kiến trúc Chu vi được định nghĩa bằng phần mềm (\textit{Software-Defined Perimeter - SDP}). 
+
+Khác với các giải pháp mạng truyền thống cấp quyền truy cập ở cấp độ phân đoạn mạng, ZTNA tạo ra một ranh giới bảo mật logic, cô lập dựa trên định danh và ngữ cảnh thời gian thực. ZTNA thiết lập kết nối hẹp ở Tầng ứng dụng (Layer 7) trực tiếp giữa người dùng và ứng dụng cụ thể, loại bỏ hoàn toàn khả năng định tuyến tự do sang các tài nguyên khác trong hạ tầng doanh nghiệp.
+
+\subsection{Kiến trúc Software-Defined Perimeter (SDP) của Cloud Security Alliance}
+\label{subsec:3_1_2}
+
+Kiến trúc SDP do tổ chức Cloud Security Alliance (CSA) chuẩn hóa được thiết kế dựa trên nguyên lý triệt hạ sự hiện diện mạng công khai (\textit{Dark Cloud}). SDP ẩn hoàn toàn hạ tầng ứng dụng khỏi mạng Internet, biến các máy chủ ứng dụng thành vô hình đối với các công cụ dò quét rủi ro. 
+
+Mô hình SDP thực hiện phân tách triệt để giữa Mặt phẳng kiểm soát (\textit{Control Plane}) và Mặt phẳng dữ liệu (\textit{Data Plane}). Nhờ đó, việc xác thực định danh, đánh giá trạng thái an toàn của thiết bị và ra quyết định cấp quyền được hoàn tất hoàn toàn trên Mặt phẳng kiểm soát trước khi bất kỳ luồng lưu lượng ứng dụng nào được phép truyền tải trên Mặt phẳng dữ liệu.
+
+\subsection{Các thành phần cốt lõi trong mô hình SDP}
+\label{subsec:3_1_3}
+
+Khung kiến trúc SDP tiêu chuẩn bao gồm ba thành phần logic chính:
+
+\begin{itemize}
+    \item \textbf{SDP Controller (Bộ điều khiển):} Đóng vai trò là trung tâm ra quyết định trên Mặt phẳng kiểm soát. Controller tiếp nhận yêu cầu kết nối, xác thực định danh người dùng qua các nhà cung cấp định danh (IdP), kiểm tra điều kiện an toàn của thiết bị và đối chiếu chính sách truy cập. Controller chỉ phát chỉ thị cho điểm chấp nhận kết nối khi yêu cầu thỏa mãn toàn bộ tiêu chí an toàn.
+    \item \textbf{Initiating Host (IH -- Thiết bị khởi tạo):} Là thành phần chạy trên thiết bị đầu cuối của người dùng (dưới dạng Agent hoặc giao diện Trình duyệt). IH chịu trách nhiệm thu thập thông tin định danh, chứng thư số, thông số cấu hình và tình trạng an toàn hệ thống để gửi tới SDP Controller nhằm xin cấp quyền kết nối.
+    \item \textbf{Accepting Host (AH -- Thiết bị chấp nhận):} Đóng vai trò là điểm thực thi chính sách trên Mặt phẳng dữ liệu, nằm ngay trước các máy chủ ứng dụng. AH liên tục lắng nghe chỉ thị từ Controller và duy trì các kết nối đi ra (\textit{Outbound-only}). AH chỉ cho phép các gói tin mã hóa từ các IH đã qua xác thực truyền qua để truy cập ứng dụng đích.
+\end{itemize}
+
+% Hình 3.1: Sơ đồ kiến trúc SDP
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[node distance=2cm, auto, >=stealth,
+    box/.style={rectangle, draw=blue!70, fill=blue!5, thick, minimum width=3cm, minimum height=1cm, align=center, rounded corners=2pt},
+    plane/.style={draw=gray!50, dashed, fill=gray!5, inner sep=10pt, rounded corners=5pt}]
+
+    % Control Plane Box
+    \node [box] (controller) {\textbf{SDP Controller}\\(\textit{Control Plane})};
+    \node [box, left=3.5cm of controller] (idp) {\textbf{Identity Provider}\\(\textit{IdP / IAM})};
+    \node [box, right=3.5cm of controller] (edr) {\textbf{EDR / MDM}\\(\textit{Posture Check})};
+
+    % Data Plane Box
+    \node [box, below=2.5cm of controller] (gateway) {\textbf{Accepting Host (AH)}\\(\textit{ZTNA Gateway})};
+    \node [box, left=3.5cm of gateway] (ih) {\textbf{Initiating Host (IH)}\\(\textit{Client Agent})};
+    \node [box, right=3.5cm of gateway] (app) {\textbf{App Server}\\(\textit{Target Resource})};
+
+    % Connectors
+    \draw[<->, thick, dashed, blue] (ih) |- node[above, pos=0.75] {1. Xác thực \& Posture} (controller);
+    \draw[<->, thick, dashed] (controller) -- (idp);
+    \draw[<->, thick, dashed] (controller) -- (edr);
+    \draw[->, thick, red] (controller) -- node[right] {2. Chỉ thị cấp phép} (gateway);
+    \draw[->, thick, green!50!black] (ih) -- node[above] {3. Gói SPA \& mTLS} (gateway);
+    \draw[->, thick, green!50!black] (gateway) -- node[above] {4. Truy cập L7} (app);
+
+\end{tikzpicture}%
+}
+\caption{Mô hình Kiến trúc SDP phân tách Mặt phẳng Kiểm soát và Mặt phẳng Dữ liệu}
+\label{fig:sdp_architecture}
+\end{figure}
+
+% ==========================================
+% SECTION 3.2
+% ==========================================
+\section{Các cơ chế kỹ thuật nòng cốt của ZTNA}
+\label{sec:3_2}
+
+\subsection{Cơ chế "Dark Cloud" (Mạng ẩn) và nguyên lý Default Deny}
+\label{subsec:3_2_1}
+
+Cơ chế "Dark Cloud" áp dụng triết lý từ chối mặc định (\textit{Default Deny}). Trong mô hình này, các cổng dịch vụ đi vào (\textit{Inbound Ports}) trên hệ thống tường lửa biên và gateway đều được đóng hoàn toàn đối với lưu lượng truy cập công cộng. 
+
+Hạ tầng ứng dụng không phản hồi các gói tin thăm dò ICMP hoặc TCP SYN từ bên ngoài, khiến toàn bộ hệ thống hoàn toàn ẩn khỏi các công cụ rà quét cổng (\textit{Port Scanning}) và công cụ tìm kiếm lỗ hổng tự động. Bề mặt tấn công của doanh nghiệp được thu nhỏ về mức tối thiểu, ngăn ngừa các cuộc tấn công thăm dò và khai thác lỗ hổng Zero-day.
+
+\subsection{Xác thực trước gói tin (Single Packet Authorization -- SPA)}
+\label{subsec:3_2_2}
+
+Xác thực trước gói tin (SPA) là kỹ thuật mật mã hóa cho phép thiết bị khởi tạo (IH) chứng minh quyền truy cập hợp lệ tới thiết bị chấp nhận (AH) chỉ bằng một gói tin mã hóa duy nhất trước khi bất kỳ kết nối TCP/UDP nào được khởi tạo.
+
+\begin{enumerate}
+    \item \textbf{Khởi tạo và Mã hóa:} Khi người dùng yêu cầu truy cập, Client Agent đóng gói dữ liệu bao gồm: định danh người dùng, dấu thời gian (\textit{Timestamp}), địa chỉ IP nguồn và khóa OTP hoặc chữ ký số HMAC vào một gói tin UDP duy nhất.
+    \item \textbf{Kiểm tra thụ động:} AH vận hành ở chế độ lắng nghe thụ động (\textit{Passive Sniffing}) tại tầng liên kết dữ liệu mà không mở cổng lắng nghe giao thức TCP.
+    \item \textbf{Mở cổng động (\textit{Dynamic Pinholing}):} AH giải mã gói tin SPA và xác thực chữ ký số. Nếu gói tin hợp lệ, AH cập nhật tạm thời quy tắc tường lửa trong vài giây, cho phép duy nhất địa chỉ IP nguồn của Client thiết lập bắt tay TCP tới cổng ứng dụng. Mọi gói tin không chứa SPA hợp lệ đều bị silently dropped.
+\end{enumerate}
+
+\subsection{Xác thực TLS hai chiều (Mutual TLS -- mTLS)}
+\label{subsec:3_2_3}
+
+Khi cổng kết nối tạm thời được mở thông qua SPA, ZTNA thực thi cơ chế xác thực TLS hai chiều (mTLS) ở Tầng ứng dụng nhằm đảm bảo tính bảo mật và toàn vẹn của đường truyền:
+
+\begin{itemize}
+    \item \textbf{Xác thực hai chiều:} Khác với giao thức TLS thông thường (chỉ máy chủ xuất trình chứng thư), mTLS bắt buộc cả Client và ZTNA Gateway phải xuất trình chứng thư số X.509 hợp lệ do Hạ tầng khóa công khai (\textit{PKI}) của doanh nghiệp cấp phát.
+    \item \textbf{Mã hóa End-to-End:} Kênh truyền mã hóa mTLS ngăn chặn triệt để các cuộc tấn công nghe lén, giả mạo thiết bị và tấn công đứng giữa (\textit{Man-in-the-Middle}).
+\end{itemize}
+
+\subsection{Động cơ đánh giá tin cậy động (Trust Engine) và Kiểm soát truy cập ABAC}
+\label{subsec:3_2_4}
+
+Động cơ đánh giá tin cậy động (\textit{Continuous Adaptive Trust Engine}) đóng vai trò là bộ não phân tích rủi ro của ZTNA Controller:
+
+\begin{itemize}
+    \item \textbf{Mô hình kiểm soát ABAC (\textit{Attribute-Based Access Control}):} Thay vì phân quyền tĩnh theo vai trò (RBAC), ZTNA áp dụng mô hình ABAC đánh giá linh hoạt dựa trên tổ hợp thuộc tính: Thuộc tính định danh, Thuộc tính thiết bị, Thuộc tính môi trường mạng và Thuộc tính tài nguyên.
+    \item \textbf{Thuật toán tính toán điểm tin cậy thời gian thực:} Trust Engine liên tục tính toán điểm số tin cậy $T_{\text{score}}$ biến đổi dựa trên dữ liệu tổng hợp từ IdP, EDR, MDM và SIEM. Nếu điểm $T_{\text{score}}$ giảm xuống dưới ngưỡng an toàn quy định cho ứng dụng nhạy cảm $R_k$, hệ thống sẽ ngay lập tức yêu cầu xác thực bổ sung (MFA) hoặc hạ cấp quyền truy cập.
+\end{itemize}
+
+% ==========================================
+% SECTION 3.3
+% ==========================================
+\section{Phân loại các mô hình kiến trúc ZTNA}
+\label{sec:3_3}
+
+\subsection{Client-initiated ZTNA (Dựa trên Agent) và Quy trình kiểm tra Device Posture}
+\label{subsec:3_3_1}
+
+Mô hình này yêu cầu cài đặt ứng dụng Agent chuyên dụng trên thiết bị đầu cuối của người dùng.
+
+\begin{itemize}
+    \item \textbf{Nguyên lý hoạt động và Thu thập Device Posture:} Agent chạy ngầm trên thiết bị, liên tục thu thập các thông số kỹ thuật về tình trạng an toàn của hệ thống (\textit{Device Posture}) bao gồm: phiên bản hệ điều hành, trạng thái cập nhật bản vá, tình trạng mã hóa ổ đĩa (BitLocker/FileVault) và chỉ số từ phần mềm EDR/Antivirus. Các dữ liệu này được đính kèm vào yêu cầu xác thực gửi tới Controller.
+    \item \textbf{Ưu điểm:} Hỗ trợ toàn diện mọi giao thức mạng (HTTP/HTTPS, SSH, RDP, SMB, UDP/TCP tùy biến); có khả năng đánh giá sâu và liên tục tình trạng an toàn thiết bị đầu cuối.
+    \item \textbf{Nhược điểm:} Tăng độ phức tạp trong công tác quản trị và triển khai Agent trên diện rộng; không phù hợp áp dụng cho thiết bị cá nhân của nhân viên (BYOD) hoặc lực lượng lao động tạm thời/nhà thầu.
+    \item \textbf{Trường hợp áp dụng:} Lực lượng nhân viên chính thức sử dụng máy tính do công ty cấp (\textit{Corporate-managed Devices}) cần truy cập vào các ứng dụng nội bộ đa giao thức.
+\end{itemize}
+
+\subsection{Service-initiated ZTNA (Agentless / Reverse Proxy)}
+\label{subsec:3_3_2}
+
+Mô hình Agentless sử dụng công nghệ Máy chủ ủy nhiệm ngược (\textit{Reverse Proxy / Identity-Aware Proxy}) kết hợp với các trình duyệt web tiêu chuẩn.
+
+\begin{itemize}
+    \item \textbf{Nguyên lý kết nối Outbound-only:} Một ZTNA Connector/Broker đặt tại trung tâm dữ liệu nội bộ sẽ chủ động mở và duy trì kênh kết nối đi ra (\textit{Outbound Connection}) tới ZTNA Cloud Service. Khi người dùng truy cập vào ứng dụng qua cổng Web, ZTNA Cloud Service xác thực định danh qua SSO/IdP và bắc cầu luồng dữ liệu về Connector nội bộ mà không cần mở cổng vào trên tường lửa doanh nghiệp.
+    \item \textbf{Ưu điểm:} Triển khai tức thì, không yêu cầu cài đặt bất kỳ phần mềm nào trên máy trạm; tương thích hoàn hảo với các mô hình thiết bị cá nhân (BYOD) và đối tác bên ngoài.
+    \item \textbf{Nhược điểm:} Bị giới hạn bởi các giao thức hỗ trợ trên trình duyệt web (chủ yếu là HTTP/HTTPS, SSH/RDP qua HTML5 terminal); khả năng kiểm tra tình trạng an toàn thiết bị bị hạn chế.
+    \item \textbf{Trường hợp áp dụng:} Cấp quyền truy cập cho nhà thầu bên thứ ba, tư vấn viên hoặc nhân viên sử dụng thiết bị cá nhân (BYOD) truy cập vào các ứng dụng chuẩn Web.
+\end{itemize}
+
+\subsection{Các mô hình phân bổ hạ tầng (Cloud-Managed Broker vs. On-Premises Gateway)}
+\label{subsec:3_3_3}
+
+Giải pháp ZTNA có thể được phân bổ linh hoạt theo ba dạng kiến trúc triển khai thực tế:
+
+\begin{itemize}
+    \item \textbf{Mô hình Đám mây thuần túy (Cloud-Managed Broker / SaaS ZTNA):} Controller và Gateway nằm hoàn toàn trên hạ tầng Đám mây toàn cầu của nhà cung cấp giải pháp. Mô hình này tối ưu hóa định tuyến lưu lượng trực tiếp (\textit{Direct-to-App}), giảm thiểu độ trễ cho người dùng toàn cầu.
+    \item \textbf{Mô hình Cục bộ (On-Premises / Private ZTNA):} Controller và Gateway được cài đặt hoàn toàn trong Trung tâm dữ liệu nội bộ của doanh nghiệp. Mô hình này phù hợp với các tổ chức có yêu cầu nghiêm ngặt về chủ quyền dữ liệu như Ngân hàng, Tài chính, Quốc phòng và Cơ quan Nhà nước.
+    \item \textbf{Mô hình Lai (Hybrid ZTNA):} Mặt phẳng kiểm soát (Controller) được quản lý tập trung trên Đám mây, trong khi Mặt phẳng dữ liệu (Gateway/Connector) được phân bổ linh hoạt tại cả Trung tâm dữ liệu nội bộ và các nền tảng Đa đám mây.
+\end{itemize}
+
+% ==========================================
+% SECTION 3.4
+% ==========================================
+\section{Phân tích chi tiết Luồng dữ liệu (Data Flow) trong ZTNA}
+\label{sec:3_4}
+
+\subsection{Quy trình 4 bước khởi tạo và bắc cầu kết nối Tầng 7}
+\label{subsec:3_4_1}
+
+Quy trình xử lý luồng dữ liệu từ khi người dùng khởi tạo yêu cầu đến khi thiết lập kênh truyền thông an toàn trong ZTNA trải qua 4 bước nối tiếp:
+
+\begin{enumerate}
+    \item \textbf{Bước 1: Khởi tạo yêu cầu và Kiểm tra trạng thái thiết bị (Device Posture Check):}
+    Người dùng khởi tạo yêu cầu truy cập tới một ứng dụng doanh nghiệp. ZTNA Agent trên máy trạm chặn yêu cầu này, thực hiện thu thập dữ liệu về tình trạng an toàn của thiết bị (mã hóa ổ đĩa, trạng thái EDR, phiên bản OS) và tổng hợp thành tệp dữ liệu ngữ cảnh.
+
+    \item \textbf{Bước 2: Gửi gói SPA và Xác thực định danh tại ZTNA Controller:}
+    Agent đóng gói thông tin ngữ cảnh và gửi gói tin SPA mã hóa tới ZTNA Controller trên Mặt phẳng kiểm soát. Controller tiến hành xác thực định danh người dùng thông qua hệ thống IdP (thực thi MFA chống lừa đảo), đồng thời đánh giá tình trạng an toàn thiết bị. Nếu đạt yêu cầu chính sách, Controller phát một mã ủy quyền có thời hạn ngắn (\textit{Short-lived Session Token}).
+
+    \item \textbf{Bước 3: Điều khiển thực thi và Cấu hình ZTNA Gateway:}
+    ZTNA Controller gửi chỉ thị điều khiển tới ZTNA Gateway nằm ở Mặt phẳng dữ liệu. Gateway dựa trên chỉ thị này để cấu hình quy tắc tường lửa động (\textit{Dynamic Pinholing}), chỉ mở cổng cho đúng IP nguồn của phiên trong thời gian ngắn.
+
+    \item \textbf{Bước 4: Thiết lập kênh kết nối bắc cầu Tầng 7 (Application Bridging):}
+    ZTNA Gateway thiết lập đường truyền mã hóa mTLS với Client Agent, đồng thời ghép nối với kết nối Outbound duy trì sẵn từ ZTNA Connector nội bộ. Kết nối bắc cầu ở Tầng ứng dụng (Layer 7) được hoàn tất, cho phép người dùng trao đổi dữ liệu an toàn với duy nhất ứng dụng đích được chỉ định.
+\end{enumerate}
+
+% Hình 3.2: Sơ đồ luồng dữ liệu 4 bước
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=3.8cm, % Tăng khoảng cách giữa các ô từ 2.8cm lên 3.8cm
+    auto, 
+    >=stealth,
+    actor/.style={rectangle, draw=blue!80, fill=blue!10, thick, minimum width=2.2cm, minimum height=0.8cm, align=center},
+    line/.style={draw, ->, thick}
+]
+
+    % Nodes
+    \node [actor] (client) {\textbf{Client / Agent}};
+    \node [actor, right=of client] (controller) {\textbf{ZTNA Controller}};
+    \node [actor, right=of controller] (gateway) {\textbf{ZTNA Gateway}};
+    \node [actor, right=of gateway] (app) {\textbf{Target App}};
+
+    % Sequential Flow (Thêm yshift để đẩy chữ lên/xuống khỏi viền mũi tên)
+    \draw[->, thick, blue] (client) -- node[above, font=\footnotesize, yshift=2pt] {1. Posture Check \& SPA} (controller);
+    \draw[->, thick, red] (controller) -- node[above, font=\footnotesize, yshift=2pt] {2. Rule Pinholing} (gateway);
+    \draw[->, thick, green!50!black] (client) to[bend right=30] node[below, font=\footnotesize, yshift=-3pt] {3. Đường hầm mTLS (Layer 7)} (gateway);
+    \draw[->, thick, green!50!black] (gateway) -- node[above, font=\footnotesize, yshift=2pt] {4. Forward Req} (app);
+
+\end{tikzpicture}%
+}
+\caption{Sơ đồ Chuỗi Tiến trình Luồng dữ liệu 4 bước trong Kết nối ZTNA}
+\label{fig:ztna_data_flow}
+\end{figure}
+
+\subsection{Cơ chế giám sát liên tục và thu hồi phiên tức thì (Continuous Enforcement)}
+\label{subsec:3_4_2}
+
+Không giống như các giải pháp truyền thống chỉ kiểm tra một lần tại thời điểm đăng nhập, ZTNA duy trì cơ chế đánh giá liên tục trong suốt chu kỳ sống của phiên kết nối:
+
+\begin{itemize}
+    \item \textbf{Thu thập Telemetry thực thời:} ZTNA Controller liên tục nhận các luồng dữ liệu giám sát từ Agent và hệ thống EDR/SIEM.
+    \item \textbf{Kích hoạt công tắc ngắt khẩn cấp (Kill-Switch):} Nếu thiết bị đầu cuối phát sinh dấu hiệu bất thường (ví dụ: EDR phát hiện mã độc thực thi, người dùng thay đổi IP/vị trí địa lý đột ngột, hoặc chứng thư bị thu hồi), Controller lập tức phát lệnh thu hồi \textit{Session Token} xuống ZTNA Gateway.
+    \item \textbf{Đóng ngắt phiên tức thì:} ZTNA Gateway hủy bỏ đường hầm mã hóa mTLS/Reverse Tunnel ngay tại thời điểm thực thời, cô lập thiết bị khỏi ứng dụng mà không ảnh hưởng đến các phiên kết nối khác trong hệ thống.
+\end{itemize}

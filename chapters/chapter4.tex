@@ -1,0 +1,179 @@
+\chapter{SO SÁNH CHUYÊN SÂU ZTNA VÀ CÁC GIẢI PHÁP TRUYỀN THỐNG}
+\label{chap:chuong_4}
+
+% ==========================================
+% SECTION 4.1
+% ==========================================
+\section{So sánh về Kiến trúc và Tầng hoạt động (Layer 3/4 vs Layer 7)}
+\label{sec:4_1}
+
+\subsection{Cơ chế cấp quyền ở Tầng Mạng/Giao vận (Layer 3/4) trong VPN truyền thống}
+\label{subsec:4_1_1}
+
+Giải pháp Mạng riêng ảo (VPN) được thiết kế dựa trên triết lý bảo mật chu vi cổ điển, dựa vào ranh giới địa lý hoặc phân đoạn IP để xác định độ tin cậy. Khi người dùng thiết lập kết nối VPN thành công (thông qua giao thức IPsec hoặc SSL/TLS VPN), hệ thống khởi tạo một giao diện mạng ảo (\textit{Virtual Network Interface - TUN/TAP}) trên thiết bị đầu cuối và cấp cho thiết bị một địa chỉ IP nội bộ thuộc dải Subnet của doanh nghiệp.
+
+Về bản chất, VPN hoạt động ở Tầng Mạng (\textit{Layer 3}) hoặc Tầng Giao vận (\textit{Layer 4}) trong mô hình OSI:
+
+\begin{itemize}
+    \item \textbf{Cấu trúc Giao hầm IPsec/SSL (IP Tunneling Mechanics):} VPN thực hiện đóng gói toàn bộ gói tin IP (\textit{IP-in-IP Encapsulation}). Gói tin IP gốc từ thiết bị người dùng (chứa IP nguồn nội bộ và IP đích nội bộ) được mã hóa và bọc bên trong một tiêu đề IP công cộng (\textit{Outer IP Header}) để truyền qua Internet. Khi tới VPN Concentrator tại trung tâm dữ liệu, tiêu đề ngoài bị bóc tách và gói tin IP gốc được đẩy thẳng vào mạng LAN.
+    \item \textbf{Khả năng định tuyến toàn phân đoạn (Subnet Routing):} Ngay khi giao hầm kết nối được thiết lập, phần mềm VPN Client sẽ can thiệp vào bảng định tuyến (\textit{Routing Table}) của hệ điều hành, thêm các tuyến đường (\textit{Routes}) hướng toàn bộ luồng dữ liệu về giao diện TUN/TAP. Thiết bị người dùng trở thành một nút mạng (\textit{Node}) chính thức trong dải Subnet nội bộ, có khả năng phát các gói tin ARP, ICMP, và truyền thông điệp IP tự do tới các địa chỉ lân cận.
+    \item \textbf{Cấp quyền theo dải IP và Cổng (IP/Port-based ACLs):} Việc kiểm soát truy cập trên VPN phụ thuộc hoàn toàn vào quy tắc Tường lửa (\textit{Firewall Access Control Lists}) dựa trên bộ 5 tham số (\textit{5-tuple}): địa chỉ IP nguồn, địa chỉ IP đích, cổng nguồn, cổng đích và giao thức. Mô hình này hoàn toàn "mù" về mặt ngữ cảnh ứng dụng (\textit{Application-unaware}). Nếu mở quyền IP cho một máy chủ, người dùng có thể tiếp cận mọi dịch vụ chạy trên máy chủ đó (HTTP cổng 80, SSH cổng 22, RDP cổng 3389, SMB cổng 445).
+\end{itemize}
+
+\subsection{Cơ chế cấp quyền ở Tầng Ứng dụng (Layer 7) trong ZTNA}
+\label{subsec:4_1_2}
+
+Khác biệt hoàn toàn với VPN, ZTNA dịch chuyển điểm kiểm soát lên Tầng Ứng dụng (\textit{Layer 7}). ZTNA loại bỏ khái niệm "đưa thiết bị vào mạng nội bộ" và thay thế bằng cơ chế bắc cầu ứng dụng có điều kiện (\textit{Application Bridging}).
+
+\begin{itemize}
+    \item \textbf{Cô lập hoàn toàn với Tầng Mạng (L3 Network Isolation):} Trong mô hình ZTNA, thiết bị đầu cuối không bao giờ được cấp địa chỉ IP nội bộ và không nhận bất kỳ tuyến định tuyến IP nào vào hạ tầng doanh nghiệp. Bảng định tuyến của hệ điều hành không bị thay đổi. Thiết bị bị cô lập hoàn toàn khỏi giao thức ARP, ICMP, và các lưu lượng Quảng bá/Đa hướng (\textit{Broadcast/Multicast}) của mạng LAN.
+    \item \textbf{Chu vi vi mô từng ứng dụng (Per-Application Micro-Perimeter):} ZTNA thiết lập một kênh giao tiếp điểm-nối-điểm (\textit{Point-to-Point}) được mã hóa hẹp, chỉ gắn liền với duy nhất tiến trình (\textit{Process}) hoặc ứng dụng được chỉ định. ZTNA Gateway chỉ chuyển tiếp duy nhất các luồng dữ liệu HTTP/HTTPS hoặc SSH/RDP dành riêng cho Tên miền dịch vụ (\textit{Fully Qualified Domain Name - FQDN}) đã được phê duyệt.
+    \item \textbf{Cơ chế Ủy nhiệm nhận biết Định danh (Identity-Aware L7 Proxying):} ZTNA Connector đóng vai trò là một L7 Reverse Proxy. Connector chấm dứt phiên TCP/TLS từ phía Client, bóc tách tiêu đề L7 để kiểm tra và xác thực từng yêu cầu HTTP/giao thức, đối chiếu mã thông báo ủy quyền (\textit{Session Token}) trước khi tạo một kết nối nội bộ mới tới máy chủ ứng dụng.
+\end{itemize}
+
+\subsection{Phân tích So sánh giữa Mô hình Định tuyến và Mô hình Ủy nhiệm L7}
+\label{subsec:4_1_3}
+
+Sự khác biệt về tầng hoạt động dẫn đến hai triết lý kiểm soát truy cập đối lập:
+
+\begin{itemize}
+    \item \textbf{Mô hình Định tuyến (Routing Model - VPN):} Dựa trên việc chuyển tiếp gói tin (\textit{Packet Forwarding}). Tường lửa và VPN Concentrator đóng vai trò là các bộ định tuyến L3/L4. Một khi gói tin vượt qua khâu kiểm tra ACL ban đầu, nó được tự do di chuyển qua các hạ tầng mạng trung gian để tới đích mà không chịu sự kiểm tra nội dung L7 liên tục.
+    \item \textbf{Mô hình Ủy nhiệm (Proxy/Broker Model - ZTNA):} Dựa trên việc ngắt đoạn và thiết lập lại kết nối (\textit{Connection Termination \& Re-origination}). ZTNA Gateway chấm dứt phiên kết nối TCP/TLS từ Client, kiểm tra tính hợp lệ của ngữ cảnh L7, và sau đó khởi tạo một phiên kết nối nội bộ hoàn toàn mới từ ZTNA Connector tới máy chủ ứng dụng. Hai không gian mạng (Client-side và Server-side) được tách biệt hoàn toàn về mặt logic lẫn vật lý.
+\end{itemize}
+
+Sự khác biệt cốt lõi giữa hai mô hình chính là: VPN mở rộng chu vi mạng đến thiết bị người dùng, còn ZTNA thu hẹp chu vi bảo mật về đúng ứng dụng đích.
+
+% ==========================================
+% SECTION 4.2
+% ==========================================
+\section{So sánh Bề mặt tấn công, Mô hình đe dọa và An toàn thông tin}
+\label{sec:4_2}
+
+\subsection{Phân tích Di chuyển ngang (Lateral Movement) theo Chuỗi tấn công MITRE ATT\&CK}
+\label{subsec:4_2_1}
+
+Nguy cơ di chuyển ngang là điểm yếu nguy hiểm nhất của kiến trúc VPN truyền thống khi đối mặt với các cuộc tấn công APT hoặc mã độc tống tiền (Ransomware):
+
+\begin{itemize}
+    \item \textbf{Chuỗi xâm nhập qua VPN (VPN Kill Chain):}
+    \begin{enumerate}
+        \item \textit{Thâm nhập ban đầu (Initial Access):} Kẻ tấn công chiếm tài khoản VPN qua Phishing, Credential Stuffing hoặc khai thác lỗ hổng thiết bị VPN.
+        \item \textit{Thăm dò nội bộ (Discovery - T1046):} Khi kết nối VPN được lập, kẻ tấn công thực hiện quét dải Subnet nội bộ (`nmap -sP 192.168.1.0/24`), phát hiện các máy chủ active, các cổng dịch vụ mở và các dịch vụ Active Directory/Domain Controller.
+        \item \textit{Di chuyển sang ngang (Lateral Movement - T1210):} Kẻ tấn công lợi dụng các giao thức quản trị như SMB (Port 445), RDP (Port 3389), WMI hoặc SSH để lây nhiễm chéo sang các máy chủ lân cận, khai thác lỗ hổng như EternalBlue hay ZeroLogon.
+    \end{enumerate}
+    
+    \item \textbf{Khả năng triệt tiêu di chuyển ngang của ZTNA:} Do ZTNA không cấp kết nối ở tầng IP, thiết bị của người dùng hoàn toàn không thể "nhìn thấy" hoặc giao tiếp với các thiết bị khác trong cùng Trung tâm dữ liệu. Lệnh `ping`, `traceroute`, hay quét dải IP nội bộ đều thất bại do không có tuyến định tuyến L3. Bán kính thiệt hại (\textit{Blast Radius}) được giới hạn tuyệt đối trong duy nhất ứng dụng được phân quyền.
+\end{itemize}
+
+\subsection{Khả năng triệt tiêu tấn công Quét cổng (Port Scanning) và Thăm dò lỗ hổng}
+\label{subsec:4_2_2}
+
+\begin{itemize}
+    \item \textbf{Bề mặt hiển thị của VPN:} VPN Concentrator bắt buộc phải mở các cổng kết nối công khai ra Internet (cổng 443 cho SSL-VPN, cổng 500/4500 cho IPsec). Các cổng này liên tục bị quét bởi các cỗ máy như Shodan, Censys. Khi xuất hiện lỗ hổng Zero-day trên thiết bị VPN (như các lỗ hổng RCE nổi tiếng trên Fortinet, Pulse Secure, Palo Alto), kẻ tấn công có thể khai thác trực tiếp từ Internet mà không cần qua bước xác thực ban đầu.
+    \item \textbf{Cơ chế Mạng ẩn (Dark Cloud) trong ZTNA:} ZTNA áp dụng triết lý đóng toàn bộ cổng đi vào (\textit{Zero Inbound Open Ports}). Các máy chủ ứng dụng và ZTNA Connector nằm hoàn toàn đằng sau tường lửa ở chế độ `Default Deny`. ZTNA Connector chỉ chủ động mở các kết nối đi ra (\textit{Outbound-only connections}) tới ZTNA Cloud Broker. Khi kẻ tấn công thực hiện quét TCP SYN hoặc ICMP ping tới IP công cộng của doanh nghiệp, hệ thống hoàn toàn ngắt kết nối và không phản hồi, khiến hạ tầng trở nên "vô hình".
+\end{itemize}
+
+\subsection{Phòng chống tấn công Từ chối dịch vụ (DDoS) và Tấn công đứng giữa (MitM)}
+\label{subsec:4_2_3}
+
+\begin{itemize}
+    \item \textbf{Phòng chống tấn công DDoS:} Hạ tầng VPN tập trung tại Trung tâm dữ liệu chính (HQ) dễ dàng trở thành mục tiêu của các cuộc tấn công DDoS làm cạn kiệt băng thông hoặc tài nguyên xử lý (SYN Flood, SSL Handshake Flood). Trái lại, ZTNA tận dụng hạ tầng Đám mây phân tán toàn cầu (Cloud Edge Network). Lưu lượng tấn công DDoS bị hấp thụ và triệt tiêu ngay tại các nút Edge gần nguồn phát nhất trước khi chạm tới hạ tầng doanh nghiệp.
+    \item \textbf{Phòng chống tấn công Man-in-the-Middle (MitM):} VPN truyền thống thường khó kiểm soát triệt để tính hợp lệ của chứng thư trên máy trạm. ZTNA bắt buộc áp dụng giao thức mTLS (Mutual TLS), trong đó cả Client và Gateway đều phải xác minh chứng thư X.509 hai chiều ở cấp độ mã hóa phần cứng (TPM/Secure Enclave), vô hiệu hóa hoàn toàn nguy cơ giả mạo Gateway hoặc nghe lén.
+\end{itemize}
+
+% ==========================================
+% SECTION 4.3
+% ==========================================
+\section{So sánh Hiệu năng, Trải nghiệm và Quản trị Vận hành}
+\label{sec:4_3}
+
+\subsection{Mô hình hóa Toán học Độ trễ và Hiện tượng Nghẽn cổ chai (Hairpinning)}
+\label{subsec:4_3_1}
+
+Trong bối cảnh doanh nghiệp chuyển dịch sang sử dụng các ứng dụng Điện toán đám mây (SaaS như Microsoft 365, Salesforce), kiến trúc VPN bộc lộ suy giảm hiệu năng nghiêm trọng do hiện tượng "Vòng ngược luồng dữ liệu" (\textit{Traffic Hairpinning / Backhauling}).
+
+\begin{itemize}
+    \item \textbf{Mô hình độ trễ trong VPN ($T_{\text{VPN}}$):} Khi người dùng truy cập ứng dụng SaaS qua VPN, lưu lượng bị đóng hầm kéo về Trung tâm dữ liệu chính (HQ) để kiểm tra qua Tường lửa NGFW rồi mới đẩy ra Internet. Tổng độ trễ truyền tải được tính bằng công thức:
+    \begin{equation}
+        T_{\text{VPN}} = T_{\text{Client} \to \text{HQ}} + T_{\text{Inspection}} + T_{\text{HQ} \to \text{SaaS}} + T_{\text{SaaS} \to \text{HQ}} + T_{\text{HQ} \to \text{Client}}
+    \end{equation}
+    Đường đi vòng này làm tăng gấp đôi quãng đường truyền dẫn mạng, làm tăng biến động độ trễ (\textit{Jitter}) và gây tắc nghẽn băng thông WAN tại HQ.
+
+    \item \textbf{Mô hình độ trễ trong ZTNA ($T_{\text{ZTNA}}$):} ZTNA ứng dụng cơ chế Định tuyến trực tiếp tối ưu (\textit{Direct-to-App Routing}). Client kết nối tới Nút Edge Cloud gần nhất qua IP Anycast:
+    \begin{equation}
+        T_{\text{ZTNA}} = T_{\text{Client} \to \text{Edge}} + T_{\text{Edge\_Inspection}} + T_{\text{Edge} \to \text{SaaS}}
+    \end{equation}
+    Do $T_{\text{Client} \to \text{Edge}} \ll T_{\text{Client} \to \text{HQ}}$, tổng thời gian đáp ứng của ZTNA giảm từ $40\%$ đến $60\%$ so với VPN, tối ưu hóa cho các dịch vụ thời gian thực như VoIP và Video Conferencing.
+\end{itemize}
+
+\subsection{Định tuyến luồng dữ liệu tối ưu qua Cloud Edge}
+\label{subsec:4_3_2}
+
+ZTNA phân tách rõ ràng luồng lưu lượng thông qua kỹ thuật Phân luồng thông minh (\textit{Native Split-Tunneling}):
+
+\begin{itemize}
+    \item \textbf{Lưu lượng Internet/SaaS công cộng:} Đẩy trực tiếp từ máy trạm ra Internet dưới sự kiểm soát chính sách của SWG/CASB tại Cloud Edge.
+    \item \textbf{Lưu lượng Ứng dụng Nội bộ:} Được mã hóa và định tuyến qua đường hầm ZTNA Connector về Trung tâm dữ liệu. Phương pháp này giải phóng hoàn toàn băng thông cho mạng WAN doanh nghiệp.
+\end{itemize}
+
+\subsection{Độ phức tạp Quản trị Chính sách, Khả năng mở rộng và Chi phí (CAPEX/OPEX)}
+\label{subsec:4_3_3}
+
+\begin{itemize}
+    \item \textbf{Độ phức tạp chính sách ($O(N)$ vs $O(N \times M)$):} Trong hệ thống VPN, việc duy trì chính sách dựa trên IP/Subnet dẫn đến sự bùng nổ số lượng quy tắc tường lửa ($O(N \times M)$ với $N$ người dùng và $M$ phân đoạn mạng). Đối với ZTNA, chính sách dựa trên thuộc tính ABAC gắn liền với định danh tập trung, giúp giảm độ phức tạp quản trị về mức $O(N + M)$.
+    \item \textbf{Khả năng mở rộng và Chi phí:} Mở rộng VPN đòi hỏi mua thêm thiết bị phần cứng VPN Concentrator đắt đỏ (chi phí CAPEX) và nâng cấp băng thông Leased-line. ZTNA chuyển đổi toàn bộ sang mô hình Đám mây (\textit{Cloud-native}), hỗ trợ tự động mở rộng quy mô (\textit{Auto-scaling}) theo nhu cầu thực tế (chuyển dịch sang chi phí vận hành OPEX).
+\end{itemize}
+
+\subsection{Bảng tổng hợp so sánh tiêu chí kỹ thuật toàn diện}
+\label{subsec:4_3_4}
+
+Bảng \ref{tab:ztna_vs_vpn_comprehensive} đối chiếu tổng thể các tiêu chí kỹ thuật cốt lõi giữa VPN truyền thống và ZTNA:
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng đối chiếu tiêu chí kỹ thuật giữa VPN truyền thống và giải pháp ZTNA}
+\label{tab:ztna_vs_vpn_comprehensive}
+\small
+\begin{tabular}{|p{3.2cm}|p{5.5cm}|p{5.5cm}|}
+\hline
+\textbf{Tiêu chí So sánh} & \textbf{Mạng riêng ảo (VPN Truyền thống)} & \textbf{Giải pháp ZTNA (Zero Trust)} \\ \hline
+\textbf{Tầng hoạt động OSI} & Tầng Mạng / Giao vận (Layer 3 / Layer 4). & Tầng Ứng dụng (Layer 7). \\ \hline
+\textbf{Mô hình kết nối} & Định tuyến tập trung về HQ (\textit{Hub-and-Spoke}). & Ủy nhiệm ứng dụng L7 (\textit{Application Proxy}). \\ \hline
+\textbf{Phạm vi cấp quyền} & Cấp quyền theo dải IP / Subnet mạng nội bộ. & Cấp quyền đích danh từng ứng dụng (\textit{Per-App}). \\ \hline
+\textbf{Trạng thái cổng kết nối} & Mở cổng Inbound công khai (443/500/4500). & Đóng toàn bộ cổng vào (\textit{Outbound-only}). \\ \hline
+\textbf{Bề mặt hiển thị} & Lộ diện IP và Cổng dịch vụ ra Internet. & Mạng ẩn hoàn toàn (\textit{Dark Cloud}). \\ \hline
+\textbf{Di chuyển ngang} & Rất cao. Nguy cơ lây nhiễm toàn bộ LAN. & Bằng không. Người dùng bị cô lập L3. \\ \hline
+\textbf{Xác thực thiết bị} & Kiểm tra một lần khi khởi tạo phiên kết nối. & Đánh giá tin cậy liên tục (\textit{Continuous Verification}). \\ \hline
+\textbf{Mô hình Định tuyến} & Kéo lưu lượng về HQ (\textit{Traffic Hairpinning}). & Định tuyến trực tiếp tới Edge (\textit{Direct-to-App}). \\ \hline
+\textbf{Độ phức tạp Chính sách} & Cao ($O(N \times M)$ quy tắc Tường lửa tĩnh). & Thấp ($O(N + M)$ quy tắc ABAC định danh). \\ \hline
+\textbf{Khả năng mở rộng} & Bị giới hạn bởi phần cứng thiết bị (CAPEX). & Mở rộng linh hoạt trên Đám mây (OPEX). \\ \hline
+\end{tabular}
+\end{table}
+
+% ==========================================
+% SECTION 4.4
+% ==========================================
+\section{Đánh giá Tổng quan và Định hướng Áp dụng}
+\label{sec:4_4}
+
+\subsection{Tổng hợp các Đánh giá Cốt lõi giữa VPN và ZTNA}
+\label{subsec:4_4_1}
+
+Qua phân tích đối chiếu chuyên sâu về kiến trúc, bề mặt tấn công và hiệu năng vận hành, có thể rút ra các đánh giá tổng quan mang tính bản chất như sau:
+
+\begin{enumerate}
+    \item \textbf{Tính tất yếu của sự chuyển dịch:} Sự sụp đổ của ranh giới mạng vật lý cổ điển khiến triết lý "Tin tưởng nhưng Kiểm tra" trên VPN không còn đáp ứng được yêu cầu bảo mật trong môi trường Đa đám mây và Làm việc linh hoạt. ZTNA là câu trả lời kỹ thuật chuẩn hóa dựa trên triết lý "Không tin tưởng bất kỳ ai, Luôn luôn xác thực".
+    \item \textbf{Ưu thế vượt trội về An toàn thông tin:} Bằng cách dịch chuyển điểm kiểm soát lên Tầng Ứng dụng (L7) và áp dụng cơ chế Mạng ẩn (\textit{Dark Cloud}), ZTNA triệt tiêu hai nguy cơ bảo mật lớn nhất của VPN là **Di chuyển sang ngang (\textit{Lateral Movement})** khi bị chiếm quyền điều khiển và **Thăm dò khai thác lỗ hổng Zero-day** trên các cổng Inbound mở công khai.
+    \item \textbf{Cải thiện Hiệu năng và Trải nghiệm Người dùng:} ZTNA loại bỏ điểm nghẽn "Vòng ngược luồng dữ liệu" (\textit{Hairpinning}) của VPN, cho phép định tuyến trực tiếp từ máy trạm tới Nút Edge gần nhất, giúp giảm đáng kể độ trễ truyền tải cho các ứng dụng thời gian thực và SaaS.
+\end{enumerate}
+
+\subsection{Những Thách thức và Định hướng Chuyển đổi Thực tế}
+\label{subsec:4_4_2}
+
+Dù mang lại nhiều ưu điểm vượt trội, việc thay thế hoàn toàn hệ thống VPN bằng ZTNA trong thực tế doanh nghiệp vẫn đòi hỏi lộ trình cân nhắc toàn diện:
+
+\begin{itemize}
+    \item \textbf{Bài toán Tương thích Ứng dụng Cũ (Legacy Apps):} Mô hình Service-initiated (Clientless ZTNA) bị giới hạn bởi các giao thức chuẩn Web. Đối với các ứng dụng cũ sử dụng giao thức Proprietary TCP/UDP hoặc yêu cầu kết nối L3 trực tiếp, doanh nghiệp bắt buộc phải áp dụng mô hình Client-initiated (Agent-based ZTNA) hoặc duy trì giải pháp song song trong giai đoạn chuyển tiếp.
+    \item \textbf{Phụ thuộc vào Hạ tầng Định danh (IAM):} ZTNA lấy định danh làm trung tâm. Việc triển khai ZTNA chỉ thực sự hiệu quả khi doanh nghiệp đã chuẩn hóa kho định danh tập trung (Active Directory/LDAP), hỗ trợ SSO và thực thi MFA chống lừa đảo.
+    \item \textbf{Định hướng Lộ trình Chuyển đổi:} Doanh nghiệp nên tiếp cận theo mô hình cuốn chiếu: Bắt đầu từ việc cấp quyền cho các bên thứ ba/nhà thầu thông qua Clientless ZTNA, sau đó áp dụng Agent-based ZTNA cho lực lượng nhân viên làm việc từ xa, và tiến tới ngưng vận hoàn toàn hệ thống VPN truyền thống.
+\end{itemize}    

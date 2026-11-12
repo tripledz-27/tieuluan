@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.25.7 (MiKTeX 26.5) (format=lualatex 2026.11.11)  11 NOV 2026 23:56
+This is LuaHBTeX, Version 1.25.7 (MiKTeX 26.5) (format=lualatex 2026.11.11)  12 NOV 2026 21:27
  restricted system commands enabled.
  file:line:error style messages enabled.
 **d:/hoctap/matma/tieuluan/tieuluan
@@ -784,7 +784,9 @@ h' as default language. on input line 14.
 def
 File: l3backend-luatex.def 2026-09-09 L3 backend support: PDF output (LuaTeX)
 \l__color_backend_stack_int=\count353
-Inserting `l3color' in `luaotfload.parse_color'.) (./tieuluan.aux)
+Inserting `l3color' in `luaotfload.parse_color'.) (./tieuluan.aux (./chapters/c
+hapter1.aux) (./chapters/chapter2.aux)
+(./chapters/chapter3.aux) (./chapters/chapter4.aux) (./chapters/chapter5.aux))
 \openout1 = tieuluan.aux
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
@@ -929,43 +931,46 @@ Package luatex.def Info: UET logo.pdf  used on input line 16.
  [1{C:/Users/OS/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}<./UET logo.pdf
 >] [2
 
-] [1
+]
+\openout2 = chapters/chapter1.aux
+ (./chapters/chapter1.tex [1
+
 
 
 ]
-LaTeX Font Info:    Calculating math sizes for size <13.00003> on input line 46
+LaTeX Font Info:    Calculating math sizes for size <13.00003> on input line 29
 .
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <13.00003> not available
-(Font)              size <12> substituted on input line 46.
+(Font)              size <12> substituted on input line 29.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <6.50002> not available
-(Font)              size <7> substituted on input line 46.
+(Font)              size <7> substituted on input line 29.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <13.00003> not available
-(Font)              size <12> substituted on input line 46.
+(Font)              size <12> substituted on input line 29.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <6.50002> not available
-(Font)              size <7> substituted on input line 46.
+(Font)              size <7> substituted on input line 29.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <13.00003> not available
-(Font)              size <12> substituted on input line 46.
+(Font)              size <12> substituted on input line 29.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <6.50002> not available
-(Font)              size <7> substituted on input line 46.
+(Font)              size <7> substituted on input line 29.
 
 
 LaTeX Font Warning: Font shape `OMX/cmex/m/n' in size <13.00003> not available
-(Font)              size <12> substituted on input line 46.
+(Font)              size <12> substituted on input line 29.
 
 
-Underfull \hbox (badness 1776) in paragraph at lines 56--56
+Underfull \hbox (badness 1776) in paragraph at lines 39--39
 \TU/TimesNewRoman(0)/b/n/18.20004 1.2. Phân tích lỗ hổng của Mô hình 
 bảo mật chu vi
  []
@@ -973,316 +978,362 @@ bảo mật chu vi
 <1.jpg, id=19, 1090.0725pt x 662.475pt>
 File: 1.jpg Graphic file (type jpg)
 <use 1.jpg>
-Package luatex.def Info: 1.jpg  used on input line 66.
+Package luatex.def Info: 1.jpg  used on input line 49.
 (luatex.def)             Requested size: 386.96027pt x 235.1651pt.
 
-Package caption Warning: \label without proper reference on input line 67.
+Package caption Warning: \label without proper reference on input line 50.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:1_1' on page 2 undefined on input line 70.
+LaTeX Warning: Reference `fig:1_1' on page 2 undefined on input line 53.
 
 [2]
 <2.jpg, id=24, 1086.0575pt x 692.5875pt>
 File: 2.jpg Graphic file (type jpg)
 <use 2.jpg>
-Package luatex.def Info: 2.jpg  used on input line 82.
+Package luatex.def Info: 2.jpg  used on input line 65.
 (luatex.def)             Requested size: 341.43307pt x 217.73293pt.
 
 
-Package caption Warning: \label without proper reference on input line 83.
+Package caption Warning: \label without proper reference on input line 66.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:1_2' on page 3 undefined on input line 86.
+LaTeX Warning: Reference `fig:1_2' on page 3 undefined on input line 69.
 
 <4.jpg, id=25, 1118.1775pt x 738.76pt>
 File: 4.jpg Graphic file (type jpg)
 <use 4.jpg>
-Package luatex.def Info: 4.jpg  used on input line 90.
+Package luatex.def Info: 4.jpg  used on input line 73.
 (luatex.def)             Requested size: 364.19667pt x 240.61269pt.
 
-Package caption Warning: \label without proper reference on input line 91.
+Package caption Warning: \label without proper reference on input line 74.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:1_3' on page 3 undefined on input line 94.
+LaTeX Warning: Reference `fig:1_3' on page 3 undefined on input line 77.
 
 [3<./1.jpg>] [4<./2.jpg><./4.jpg>]
 <3.jpg, id=32, 963.6pt x 766.865pt>
 File: 3.jpg Graphic file (type jpg)
 <use 3.jpg>
-Package luatex.def Info: 3.jpg  used on input line 103.
+Package luatex.def Info: 3.jpg  used on input line 86.
 (luatex.def)             Requested size: 341.43307pt x 271.71828pt.
 
 
-Package caption Warning: \label without proper reference on input line 104.
+Package caption Warning: \label without proper reference on input line 87.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:1_4' on page 5 undefined on input line 107.
+LaTeX Warning: Reference `fig:1_4' on page 5 undefined on input line 90.
 
 [5<./3.jpg>]
 <5.jpg, id=36, 1102.1175pt x 1445.4pt>
 File: 5.jpg Graphic file (type jpg)
 <use 5.jpg>
-Package luatex.def Info: 5.jpg  used on input line 128.
+Package luatex.def Info: 5.jpg  used on input line 111.
 (luatex.def)             Requested size: 373.3035pt x 489.57689pt.
 
 
-Package caption Warning: \label without proper reference on input line 129.
+Package caption Warning: \label without proper reference on input line 112.
 See the caption package documentation for explanation.
 
 
-LaTeX Warning: Reference `fig:1_5' on page 6 undefined on input line 132.
+LaTeX Warning: Reference `fig:1_5' on page 6 undefined on input line 115.
 
-[6] [7<./5.jpg>] [8] [9] [10]
-Underfull \hbox (badness 2828) in paragraph at lines 193--193
+[6] [7<./5.jpg>] [8] [9]) [10]
+\openout2 = chapters/chapter2.aux
+ (./chapters/chapter2.tex
+Underfull \hbox (badness 2828) in paragraph at lines 1--1
 \TU/TimesNewRoman(0)/b/n/26.00006 CƠ SỞ LÝ THUYẾT VÀ CÁC MÔ
  []
 
 [11
 
-] [12]
-LaTeX Font Info:    Calculating math sizes for size <11.70003> on input line 28
-7.
 
-Underfull \hbox (badness 10000) in paragraph at lines 290--290
+
+
+] [12]
+LaTeX Font Info:    Calculating math sizes for size <11.70003> on input line 95
+.
+
+Underfull \hbox (badness 10000) in paragraph at lines 98--98
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Truyền thống
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 291--291
+Underfull \hbox (badness 10000) in paragraph at lines 99--99
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Khởi đầu
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 292--292
+Underfull \hbox (badness 10000) in paragraph at lines 100--100
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Nâng cao
  []
 
 [13]
-Overfull \hbox (8.80586pt too wide) detected at line 327
+Overfull \hbox (8.80586pt too wide) detected at line 135
 []\TU/TimesNewRoman(2)/m/it/13.00003 T[] \OT1/cmr/m/n/11.70003 = \TU/TimesNewRo
 man(2)/m/it/13.00003 f\OT1/cmr/m/n/11.70003 ([]\OML/cmm/m/it/11.70003 ; []; []; []\OT1/cmr/m/n/11.70003 )
  []
 
 [14]
-Underfull \hbox (badness 10000) in paragraph at lines 371--371
+Underfull \hbox (badness 10000) in paragraph at lines 179--179
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Dữ liệu lưu trữ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 371--371
+Underfull \hbox (badness 10000) in paragraph at lines 179--179
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Thuật toán AES-256,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 372--372
+Underfull \hbox (badness 10000) in paragraph at lines 180--180
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Dữ liệu đường
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 372--372
+Underfull \hbox (badness 10000) in paragraph at lines 180--180
 \TU/TimesNewRoman(0)/b/n/11.70003 truyền (\TU/TimesNewRoman(0)/b/it/11.70003 
 Data in
  []
 
 
-Underfull \hbox (badness 7832) in paragraph at lines 372--372
+Underfull \hbox (badness 7832) in paragraph at lines 180--180
 []|\TU/TimesNewRoman(0)/m/n/11.70003 mTLS 1.3, IPsec (IKEv2),
  []
 
 
-Underfull \hbox (badness 2293) in paragraph at lines 373--373
+Underfull \hbox (badness 2293) in paragraph at lines 181--181
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Cách ly môi trường tính toán
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 373--373
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Điện toán bảo mật
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 373--373
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
 \TU/TimesNewRoman(0)/m/n/11.70003 (\TU/TimesNewRoman(0)/m/it/11.70003 Confidenti
 al Computing\TU/TimesNewRoman(0)/m/n/11.70003 ),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 373--373
+Underfull \hbox (badness 10000) in paragraph at lines 181--181
 \TU/TimesNewRoman(0)/m/n/11.70003 Hardware Enclaves (Intel
  []
 
 [15]
-Underfull \hbox (badness 10000) in paragraph at lines 392--392
+Underfull \hbox (badness 10000) in paragraph at lines 200--200
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Tiêu chí Đánh
  []
 
 
-Underfull \hbox (badness 4036) in paragraph at lines 393--393
+Underfull \hbox (badness 4036) in paragraph at lines 201--201
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Triết lý Độ tin
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 393--393
+Underfull \hbox (badness 10000) in paragraph at lines 201--201
 \TU/TimesNewRoman(0)/m/it/11.70003 Implicit Trust\TU/TimesNewRoman(0)/m/n/11.70
 003 ), ”Never Trust,
  []
 
 
-Underfull \hbox (badness 4205) in paragraph at lines 394--394
+Underfull \hbox (badness 4205) in paragraph at lines 202--202
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Trọng tâm Bảo
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 395--395
+Underfull \hbox (badness 10000) in paragraph at lines 203--203
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Cơ chế Phân
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 395--395
+Underfull \hbox (badness 10000) in paragraph at lines 203--203
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Cấp quyền tối thiểu (\TU/TimesNewR
 oman(0)/m/it/11.70003 Least
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 395--395
+Underfull \hbox (badness 10000) in paragraph at lines 203--203
 \TU/TimesNewRoman(0)/m/it/11.70003 Privilege\TU/TimesNewRoman(0)/m/n/11.70003 ),
  theo từng phiên
  []
 
 
-Underfull \hbox (badness 1337) in paragraph at lines 396--396
+Underfull \hbox (badness 1337) in paragraph at lines 204--204
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Xác thực & Ủy
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 396--396
+Underfull \hbox (badness 10000) in paragraph at lines 204--204
 \TU/TimesNewRoman(0)/m/n/11.70003 (\TU/TimesNewRoman(0)/m/it/11.70003 Continuous
  Evaluation\TU/TimesNewRoman(0)/m/n/11.70003 ) trong
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 397--397
+Underfull \hbox (badness 10000) in paragraph at lines 205--205
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Giám sát lưu
  []
 
 
-Underfull \hbox (badness 1424) in paragraph at lines 398--398
+Underfull \hbox (badness 1424) in paragraph at lines 206--206
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Ẩn hoàn toàn tài nguyên khỏi
  []
 
 
-Underfull \hbox (badness 4156) in paragraph at lines 399--399
+Underfull \hbox (badness 4156) in paragraph at lines 207--207
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Bán kính Thiệt
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 399--399
+Underfull \hbox (badness 10000) in paragraph at lines 207--207
 \TU/TimesNewRoman(0)/b/n/11.70003 hại (\TU/TimesNewRoman(0)/b/it/11.70003 Blas
 t
  []
 
-[16] [17] [18]
-Underfull \hbox (badness 3803) in paragraph at lines 437--437
+[16] [17]) [18]
+\openout2 = chapters/chapter3.aux
+ (./chapters/chapter3.tex
+Underfull \hbox (badness 3803) in paragraph at lines 17--17
 \TU/TimesNewRoman(0)/b/n/15.60004 3.1.2. Kiến trúc Software-Defined Perimeter
  (SDP) của Cloud
  []
 
 [19
 
-]
-Overfull \hbox (93.0004pt too wide) in paragraph at lines 480--481
-[][] 
- []
 
-[20] [21] [22]
-Underfull \hbox (badness 1418) in paragraph at lines 565--566
+
+
+] [20] [21] [22]
+Underfull \hbox (badness 1418) in paragraph at lines 147--148
 []\TU/TimesNewRoman(0)/b/n/13.00003 Mô hình Đám mây thuần túy (Cloud-Man
 aged Broker / SaaS ZTNA):
  []
 
 [23]
-Underfull \hbox (badness 3209) in paragraph at lines 633--634
+Underfull \hbox (badness 3209) in paragraph at lines 215--216
 []\TU/TimesNewRoman(0)/b/n/13.00003 Đóng ngắt phiên tức thì: \TU/TimesN
 ewRoman(0)/m/n/13.00003 ZTNA Gateway hủy bỏ đường hầm mã hóa
  []
 
-[24]
-Underfull \hbox (badness 1888) in paragraph at lines 651--651
+) [24]
+\openout2 = chapters/chapter4.aux
+ (./chapters/chapter4.tex
+Underfull \hbox (badness 1888) in paragraph at lines 1--1
 \TU/TimesNewRoman(0)/b/n/26.00006 SO SÁNH CHUYÊN SÂU ZTNA VÀ
  []
 
 [25
 
+
+
+
 ] [26] [27] [28]
-Underfull \hbox (badness 1348) in paragraph at lines 789--789
+Underfull \hbox (badness 1348) in paragraph at lines 139--139
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Mạng riêng ảo (VPN Truyền
  []
 
 
-Underfull \hbox (badness 7558) in paragraph at lines 790--790
+Underfull \hbox (badness 7558) in paragraph at lines 140--140
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Tầng hoạt động
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 791--791
+Underfull \hbox (badness 10000) in paragraph at lines 141--141
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Ủy nhiệm ứng dụng L7
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 792--792
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Phạm vi cấp
  []
 
 
-Underfull \hbox (badness 6825) in paragraph at lines 793--793
+Underfull \hbox (badness 6825) in paragraph at lines 143--143
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Trạng thái cổng
  []
 
 
-Underfull \hbox (badness 6526) in paragraph at lines 793--793
+Underfull \hbox (badness 6526) in paragraph at lines 143--143
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Mở cổng Inbound công khai
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 793--793
+Underfull \hbox (badness 10000) in paragraph at lines 143--143
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Đóng toàn bộ cổng vào
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 796--796
+Underfull \hbox (badness 10000) in paragraph at lines 146--146
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Đánh giá tin cậy liên tục
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 797--797
+Underfull \hbox (badness 10000) in paragraph at lines 147--147
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Mô hình Định
  []
 
 
-Underfull \hbox (badness 1127) in paragraph at lines 797--797
+Underfull \hbox (badness 1127) in paragraph at lines 147--147
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Kéo lưu lượng về HQ (\TU/TimesNewRo
 man(0)/m/it/11.70003 Traffic
  []
 
 
-Underfull \hbox (badness 1895) in paragraph at lines 797--797
+Underfull \hbox (badness 1895) in paragraph at lines 147--147
 []|\TU/TimesNewRoman(0)/m/n/11.70003 Định tuyến trực tiếp tới Edge
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 798--798
+Underfull \hbox (badness 10000) in paragraph at lines 148--148
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Độ phức tạp
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 799--799
+Underfull \hbox (badness 10000) in paragraph at lines 149--149
 []|\TU/TimesNewRoman(0)/b/n/11.70003 Khả năng mở
  []
 
-[29] [30] [31] (./tieuluan.aux)
+[29] [30]) [31]
+\openout2 = chapters/chapter5.aux
+ (./chapters/chapter5.tex
+Underfull \hbox (badness 10000) in paragraph at lines 2--2
+\TU/TimesNewRoman(0)/b/n/26.00006 TRIỂN KHAI THỰC TẾ, THÁCH
+ []
+
+
+LaTeX Warning: Citation `ward2014' on page 32 undefined on input line 13.
+
+[32
+
+
+
+
+]
+
+LaTeX Warning: Citation `cloudflare2022' on page 33 undefined on input line 45.
+
+
+[33]
+Underfull \hbox (badness 1552) in paragraph at lines 52--53
+[]\TU/TimesNewRoman(0)/m/it/13.00003 Xác thực phần cứng FIDO2 kết h
+ợp mTLS: \TU/TimesNewRoman(0)/m/n/13.00003 Mọi phiên truy cập qua
+ []
+
+
+LaTeX Warning: Citation `cloudflare2022' on page 34 undefined on input line 54.
+
+
+[34] [35] [36] [37] [38] [39]) [40] [41
+
+
+
+] (./tieuluan.aux
+(./chapters/chapter1.aux) (./chapters/chapter2.aux) (./chapters/chapter3.aux)
+(./chapters/chapter4.aux) (./chapters/chapter5.aux))
  ***********
 LaTeX2e <2026-11-01>
 L3 programming layer <2026-09-09>
@@ -1298,14 +1349,14 @@ LaTeX Warning: There were undefined references.
 )
 
 Here is how much of LuaTeX's memory you used:
- 23081 strings out of 475522
+ 23417 strings out of 475522
  125219,1144653 words of node,token memory allocated
- 529 words of node memory still in use:
-   6 hlist, 2 vlist, 2 rule, 2 glue, 4 kern, 1 glyph, 14 attribute, 54 glue_spec
-, 14 attribute_list, 2 write nodes
-   avail lists: 2:1232,3:697,4:72,5:161,6:87,7:5713,8:65,9:700,10:21,11:18
- 45613 multiletter control sequences out of 65536+600000
- 110 fonts using 46162503 bytes
+ 525 words of node memory still in use:
+   6 hlist, 2 vlist, 2 rule, 2 glue, 4 kern, 1 glyph, 13 attribute, 54 glue_spec
+, 13 attribute_list, 2 write nodes
+   avail lists: 2:1609,3:873,4:72,5:181,6:87,7:6070,8:65,9:700,10:21,11:18
+ 45844 multiletter control sequences out of 65536+600000
+ 111 fonts using 46945567 bytes
  107i,10n,113p,1003b,954s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Windows/Fonts/times.ttf><C:/Windows/Fonts/timesi.ttf><C:/Windows/Fonts/times
 bi.ttf><C:/Windows/Fonts/timesi.ttf><C:/Windows/Fonts/times.ttf><C:/Windows/Font
@@ -1314,9 +1365,9 @@ onts/cm/cmmi12.pfb><C:/Users/OS/AppData/Local/Programs/MiKTeX/fonts/type1/public
 /amsfonts/cm/cmr12.pfb><C:/Users/OS/AppData/Local/Programs/MiKTeX/fonts/type1/pu
 blic/amsfonts/cm/cmsy10.pfb><C:/Users/OS/AppData/Local/Programs/MiKTeX/fonts/typ
 e1/public/amsfonts/cm/cmsy9.pfb>
-Output written on tieuluan.pdf (33 pages, 808579 bytes).
+Output written on tieuluan.pdf (43 pages, 848600 bytes).
 
-PDF statistics: 177 PDF objects out of 1000 (max. 8388607)
+PDF statistics: 208 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 1048576)
  16 words of extra memory for PDF output out of 10000 (max. 100000000)
 

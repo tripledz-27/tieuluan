@@ -1,0 +1,224 @@
+\chapter{CƠ SỞ LÝ THUYẾT VÀ CÁC MÔ HÌNH NỀN TẢNG ZERO TRUST}
+\label{chap:chuong_2}
+
+% ==========================================
+% SECTION 2.1
+% ==========================================
+\section{Khung kiến trúc tham chiếu NIST SP 800-207 và Triết lý Zero Trust}
+\label{sec:2_1}
+
+\subsection{Khái niệm và 5 giả định kỹ thuật cốt lõi của Zero Trust}
+\label{subsec:2_1_1}
+
+Theo đặc tả của Viện Tiêu chuẩn và Công nghệ Quốc gia Mỹ (NIST SP 800-207), Zero Trust (ZT) là bộ các khái niệm và ý tưởng nhằm tối thiểu hóa sự không chắc chắn trong việc thực thi các quyết định truy cập chính xác, cấp quyền tối thiểu (\textit{Least Privilege}) trên từng yêu cầu truy cập trong điều kiện hệ thống mạng bị xem là đã bị xâm nhập.
+
+Triết lý của Zero Trust dựa trên 5 giả định kỹ thuật nền tảng:
+\begin{enumerate}
+    \item Mạng truyền dẫn luôn được coi là môi trường độc hại (\textit{The network is always assumed to be hostile}).
+    \item Các mối đe dọa bên trong và bên ngoài luôn tồn tại trên mạng tại mọi thời điểm.
+    \item Vị trí kết nối mạng không đủ cơ sở để quyết định độ tin cậy.
+    \item Mọi thiết bị, người dùng và luồng lưu lượng đều phải được xác thực và cấp quyền.
+    \item Chính sách bảo mật phải mang tính động và được tính toán từ nhiều nguồn dữ liệu đa dạng.
+\end{enumerate}
+
+\subsection{7 Nguyên tắc vàng của Kiến trúc Zero Trust (NIST SP 800-207)}
+\label{subsec:2_1_2}
+
+Khung kiến trúc ZTA chuẩn mực bắt buộc phải tuân thủ và vận hành dựa trên 7 nguyên tắc cốt lõi:
+\begin{enumerate}
+    \item Tất cả các nguồn dữ liệu và dịch vụ tính toán đều được coi là tài nguyên.
+    \item Mọi giao tiếp đều phải được bảo vệ bất kể vị trí mạng.
+    \item Cấp quyền truy cập theo từng phiên làm việc (\textit{Per-session basis}).
+    \item Quyền truy cập được quyết định bởi chính sách động dựa trên thuộc tính thực thời.
+    \item Doanh nghiệp giám sát và đo lường liên tục tính toàn vẹn và trạng thái an toàn của mọi tài sản.
+    \item Mọi xác thực và ủy quyền đều mang tính động và được thực thi nghiêm ngặt.
+    \item Thu thập tối đa thông tin ngữ cảnh để liên tục cải thiện trạng thái bảo mật.
+\end{enumerate}
+
+\subsection{Phân tách Mặt phẳng Kiểm soát (Control Plane) và Mặt phẳng Dữ liệu (Data Plane)}
+\label{subsec:2_1_3}
+
+Để thực hiện kiểm soát truy cập động, hệ thống thực hiện phân tách triệt để hai mặt phẳng vận hành:
+\begin{itemize}
+    \item \textbf{Mặt phẳng kiểm soát (\textit{Control Plane}):} Trung tâm ra quyết định, chịu trách nhiệm xác thực định danh, đánh giá rủi ro ngữ cảnh, tính toán điểm tin cậy và điều hướng cấu hình.
+    \item \textbf{Mặt phẳng dữ liệu (\textit{Data Plane}):} Nơi vận chuyển luồng dữ liệu ứng dụng thực tế. Kênh này chỉ được thiết lập sau khi Control Plane cấp phép thành công.
+\end{itemize}
+
+\subsection{Ba thành phần logic cốt lõi và các nguồn dữ liệu phụ trợ}
+\label{subsec:2_1_4}
+
+Kiến trúc ZTA vận hành dựa trên bộ ba thành phần logic chính:
+\begin{itemize}
+    \item \textbf{Policy Engine (PE):} Động cơ quyết định chính sách, sử dụng thuật toán tin cậy (\textit{Trust Algorithm}) để đưa ra quyết định chấp thuận hoặc từ chối truy cập.
+    \item \textbf{Policy Administrator (PA):} Thành phần quản trị chính sách, phát tín hiệu điều khiển tới điểm thực thi để mở hoặc đóng kênh dữ liệu. Bộ đôi PE và PA hợp thành Điểm quyết định chính sách (\textit{Policy Decision Point - PDP}).
+    \item \textbf{Policy Enforcement Point (PEP):} Điểm thực thi chính sách nằm trên mặt phẳng dữ liệu, trực tiếp giám sát và chấm dứt kết nối theo chỉ thị từ PA.
+\end{itemize}
+
+Cơ chế PDP đưa ra quyết định chính xác nhờ tích hợp liên tục dữ liệu từ các nguồn phụ trợ: IdP/IAM, EDR/MDM, Threat Intelligence, SIEM/Activity Logs và hạ tầng PKI.
+
+% ==========================================
+% SECTION 2.2
+% ==========================================
+\section{Mô hình Độ trưởng thành CISA (Zero Trust Maturity Model v2.0)}
+\label{sec:2_2}
+
+Mô hình ZTMM v2.0 của CISA định hình lộ trình chuyển đổi qua 5 trụ cột và 4 giai đoạn tiến hóa.
+
+\subsection{5 Trụ cột bảo mật cốt lõi}
+\label{subsec:2_2_1}
+
+\begin{enumerate}
+    \item \textbf{Định danh (\textit{Identity}):} Quản lý người dùng và các đối tượng không phải con người (\textit{NPE}). Thực thi Phishing-resistant MFA (FIDO2, PIV), hợp nhất kho định danh.
+    \item \textbf{Thiết bị (\textit{Devices}):} Quản lý tài sản phần cứng và tài sản ảo, tự động hóa kiểm tra posture, triển khai giải pháp EDR.
+    \item \textbf{Mạng (\textit{Networks}):} Chuyển từ bảo mật chu vi rộng sang các vùng vi chu vi (\textit{Micro-perimeters}), phân đoạn vi mô và mã hóa toàn bộ lưu lượng.
+    \item \textbf{Ứng dụng và Tải công việc (\textit{Applications \& Workloads}):} Bảo mật ứng dụng trên hạ tầng on-premises và đám mây, tích hợp DevSecOps, sử dụng tải công việc bất biến.
+    \item \textbf{Dữ liệu (\textit{Data}):} Tự động phân loại, gắn nhãn dữ liệu, mã hóa ở cả 3 trạng thái và triển khai hệ thống DLP.
+\end{enumerate}
+
+\subsection{Các Năng lực xuyên suốt (Cross-Cutting Capabilities)}
+\label{subsec:2_2_2}
+
+\begin{itemize}
+    \item \textbf{Khả năng quan sát và Phân tích (\textit{Visibility \& Analytics}):} Phân tích hành vi (UEBA) và săn tìm mối đe dọa (\textit{Threat Hunting}) dựa trên log/telemetry tập trung.
+    \item \textbf{Tự động hóa và Điều phối (\textit{Automation \& Orchestration}):} Tự động phản ứng sự cố và thực thi chính sách đồng bộ.
+    \item \textbf{Quản trị (\textit{Governance}):} Định nghĩa quy trình tuân thủ an toàn thông tin và quản lý rủi ro doanh nghiệp.
+\end{itemize}
+
+\subsection{4 Giai đoạn phát triển độ trưởng thành}
+\label{subsec:2_2_3}
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng so sánh 4 giai đoạn tiến hóa độ trưởng thành Zero Trust theo CISA ZTMM v2.0}
+\label{tab:cisa_maturity_stages}
+\small
+\begin{tabular}{|p{3cm}|p{10.5cm}|}
+\hline
+\textbf{Giai đoạn} & \textbf{Đặc trưng kỹ thuật cốt lõi} \\ \hline
+\textbf{Truyền thống (\textit{Traditional})} & Cấu hình thủ công; bảo mật dựa trên chu vi tĩnh (Firewall, VPN); xác thực bằng mật khẩu/MFA tĩnh; cấp quyền cố định; quản lý tài sản và phản ứng sự cố rời rạc. \\ \hline
+\textbf{Khởi đầu (\textit{Initial})} & Bắt đầu tự động hóa một số quy trình; áp dụng MFA kết hợp kiểm tra thuộc tính cơ bản; cô lập các tải công việc quan trọng; tập trung hóa thu thập log. \\ \hline
+\textbf{Nâng cao (\textit{Advanced})} & Kiểm soát tự động hóa rộng rãi; áp dụng Phishing-resistant MFA (FIDO2/PIV); phân đoạn vi mô; mã hóa toàn bộ dữ liệu lưu trữ/đường truyền; ra quyết định truy cập theo thời gian thực. \\ \hline
+\textbf{Tối ưu (\textit{Optimal})} & Tự động hóa hoàn toàn và liên tục (\textit{Just-in-Time \& Just-Enough Access}); chính sách động tự điều chỉnh bằng AI/ML; tải công việc bất biến; mã hóa dữ liệu khi đang xử lý (\textit{In-Use}). \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tiêu chí đánh giá mức độ sẵn sàng chuyển đổi}
+\label{subsec:2_2_4}
+
+Mô hình định nghĩa bộ chỉ số đánh giá hiện trạng chuyển đổi trên từng trụ cột:
+\begin{itemize}
+    \item \textbf{Tiêu chí Định danh:} Tỷ lệ áp dụng FIDO2/WebAuthn, mức độ hợp nhất kho định danh và năng lực cấp quyền ABAC/JIT.
+    \item \textbf{Tiêu chí Thiết bị:} Khả năng tự động kiểm kê 100\% tài sản, tỷ lệ phủ EDR/MDM và năng lực tự động cách ly thiết bị không tuân thủ.
+    \item \textbf{Tiêu chí Mạng:} Mức độ phân đoạn vi mô tầng ứng dụng, khả năng ẩn hệ thống ("Dark Cloud") và tỷ lệ mã hóa TLS 1.3/mTLS.
+    \item \textbf{Tiêu chí Ứng dụng \& Tải công việc:} Tích hợp SAST/DAST vào CI/CD, loại bỏ quyền truy cập trực tiếp của admin vào Production và tỷ lệ container bất biến.
+    \item \textbf{Tiêu chí Dữ liệu:} Tự động phân loại, gắn nhãn dữ liệu, triển khai DLP theo ngữ cảnh và mã hóa ở cả 3 trạng thái.
+\end{itemize}
+
+% ==========================================
+% SECTION 2.3
+% ==========================================
+\section{Các cơ chế kỹ thuật và giải pháp công nghệ nền tảng trong ZTA}
+\label{sec:2_3}
+
+Việc hiện thực hóa ZTA đòi hỏi kết hợp đồng bộ các cơ chế kỹ thuật sau:
+
+\subsection{Cơ chế xác thực và ủy quyền động dựa trên Network Agent và Trust Engine}
+\label{subsec:2_3_1}
+
+Mô hình \textbf{Thực thể đại diện mạng (\textit{Network Agent})} hợp nhất ngữ cảnh truy cập thành một đối tượng đánh giá duy nhất.
+
+\begin{enumerate}
+    \item \textbf{Cấu trúc của Network Agent:} Hợp nhất ba yếu tố bộ ba: Định danh người dùng (\textit{User Identity}), Trạng thái an toàn của thiết bị (\textit{Device Posture}) và Ứng dụng/Tải công việc khởi tạo kết nối (\textit{Application Context}).
+    \item \textbf{Nguyên lý hoạt động của Động cơ tin cậy (\textit{Trust Engine}):} Trust Engine liên tục thu thập dữ liệu từ IdP, EDR, MDM và SIEM để tính toán toán học điểm tin cậy biến đổi (\textit{Variable Trust Score}):
+    \begin{equation}
+        T_{\text{score}} = f(\text{Identity\_Risk}, \text{Device\_Health}, \text{Network\_Location}, \text{Behavioral\_Anomaly})
+    \end{equation}
+    \item \textbf{Đánh giá và cấp quyền động:} Nếu điểm tin cậy $T_{\text{score}}$ vượt qua ngưỡng an toàn $T_{\text{threshold}}$ do chính sách quy định đối với tài nguyên nhạy cảm $R_k$, PA mới phát tín hiệu xuống PEP để mở kênh kết nối tạm thời. Ngược lại, nếu trong quá trình kết nối điểm $T_{\text{score}}$ suy giảm, kết nối sẽ lập tức bị hủy bỏ hoặc yêu cầu xác thực lại bằng Phishing-resistant MFA.
+\end{enumerate}
+
+\subsection{Cơ chế phân đoạn vi mô (Micro-segmentation) và Kỹ thuật xác thực trước gói tin (SPA)}
+\label{subsec:2_3_2}
+
+\subsection{Phân đoạn vi mô (\textit{Micro-segmentation})}
+Phân đoạn vi mô thu nhỏ chu vi an toàn thành các vùng vi chu vi (\textit{Micro-perimeters}) bao quanh từng ứng dụng hoặc tải công việc (\textit{Workload}):
+\begin{itemize}
+    \item \textbf{Phân đoạn dựa trên hồ sơ ứng dụng (\textit{Application Profiling}):} Thiết lập chính sách kiểm soát lưu lượng tầng ứng dụng (Layer 7) thay vì dựa vào IP/Subnet.
+    \item \textbf{Kiểm soát luồng di chuyển ngang (\textit{East-West Traffic Inspection}):} Mọi luồng giao tiếp giữa các máy chủ ứng dụng (\textit{App Server}) và máy chủ cơ sở dữ liệu (\textit{DB Server}) đều phải qua PEP, ngăn chặn kẻ tấn công dùng máy chủ bị chiếm quyền làm điểm nhảy (\textit{Pivoting}).
+\end{itemize}
+
+\subsection{Kỹ thuật xác thực trước gói tin (\textit{Single Packet Authorization - SPA})}
+SPA giải quyết bài toán "gói tin đầu tiên" (\textit{First Packet Problem}) bằng cơ chế "Dark Cloud" (Ẩn hạ tầng):
+\begin{enumerate}
+    \item \textbf{Khởi tạo gói tin SPA:} Thiết bị đóng gói dữ liệu xác thực mã hóa ngắn (định danh, timestamp, OTP, chữ ký số HMAC) vào duy nhất một gói tin UDP.
+    \item \textbf{Kiểm tra thụ động tại PEP:} PEP lắng nghe thụ động (Passive Sniffing) và không mở bất kỳ cổng TCP nào ra ngoài. Khi nhận gói tin UDP SPA, PEP giải mã và kiểm tra chữ ký HMAC.
+    \item \textbf{Mở cổng động (\textit{Dynamic Pinholing}):} Nếu SPA hợp lệ, PEP thêm quy tắc tường lửa động mở cổng dịch vụ cho duy nhất địa chỉ IP người gửi trong vài giây. Mọi gói tin từ IP khác đều bị silently dropped.
+\end{enumerate}
+
+\subsection{Mã hóa toàn diện đường truyền và cơ chế mTLS / IPsec}
+\label{subsec:2_3_3}
+
+Mọi lưu lượng dữ liệu trao đổi trong ZTA bắt buộc phải được mã hóa end-to-end:
+\begin{itemize}
+    \item \textbf{Xác thực TLS hai chiều (\textit{Mutually Authenticated TLS - mTLS}):} Triển khai ở tầng ứng dụng (Layer 7). Cả máy chủ và máy khách đều phải xuất trình chứng thư số X.509 hợp lệ do PKI cấp phát.
+    \item \textbf{Bảo mật tầng mạng với IPsec (IKEv2):} Triển khai ở tầng mạng (Layer 3/4) cho giao tiếp máy chủ - máy chủ hoặc đám mây đa vùng, thiết lập tuyến đường hầm mã hóa bảo mật.
+\end{itemize}
+
+\subsection{Bảo vệ dữ liệu toàn diện ở 3 trạng thái}
+\label{subsec:2_3_4}
+
+Dữ liệu được bảo vệ xuyên suốt chu kỳ sống theo 3 trạng thái:
+
+\begin{table}[htbp]
+\centering
+\caption{Cơ chế bảo vệ dữ liệu ở 3 trạng thái theo chuẩn ZTA}
+\label{tab:data_security_3_states}
+\small
+\begin{tabular}{|p{3.5cm}|p{5.5cm}|p{5cm}|}
+\hline
+\textbf{Trạng thái Dữ liệu} & \textbf{Biện pháp Kỹ thuật Triển khai} & \textbf{Công nghệ \& Giao thức} \\ \hline
+\textbf{Dữ liệu lưu trữ (\textit{Data at Rest})} & Mã hóa toàn bộ ổ đĩa, cơ sở dữ liệu, bản sao lưu; quản lý khóa tập trung bằng HSM. & Thuật toán AES-256, TPM/HSM, KMS. \\ \hline
+\textbf{Dữ liệu đường truyền (\textit{Data in Transit})} & Mã hóa bắt buộc mọi luồng lưu lượng nội bộ (East-West) và công cộng (North-South). & mTLS 1.3, IPsec (IKEv2), HTTPS (TLS 1.3). \\ \hline
+\textbf{Dữ liệu đang xử lý (\textit{Data in Use})} & Cách ly môi trường tính toán trong bộ nhớ RAM, ngăn chặn đọc trộm dữ liệu cấp kernel. & Điện toán bảo mật (\textit{Confidential Computing}), Hardware Enclaves (Intel SGX, AMD SEV). \\ \hline
+\end{tabular}
+\end{table}
+
+% ==========================================
+% SECTION 2.4
+% ==========================================
+\section{So sánh Mô hình An ninh Chu vi và Kiến trúc Zero Trust}
+\label{sec:2_4}
+
+Bảng \ref{tab:comparison_perimeter_vs_zta} đối chiếu chi tiết hai mô hình an ninh mạng trên các tiêu chí kiến trúc cốt lõi:
+
+\begin{table}[htbp]
+\centering
+\caption{Bảng so sánh đối chiếu giữa Mô hình An ninh Chu vi và Kiến trúc Zero Trust}
+\label{tab:comparison_perimeter_vs_zta}
+\small
+\begin{tabular}{|p{3cm}|p{5.5cm}|p{5.5cm}|}
+\hline
+\textbf{Tiêu chí Đánh giá} & \textbf{Mô hình Chu vi Truyền thống (\textit{Perimeter Model})} & \textbf{Kiến trúc Zero Trust (\textit{ZTA})} \\ \hline
+\textbf{Triết lý Độ tin cậy} & Tin cậy mặc định (\textit{Implicit Trust}) dựa trên vị trí mạng nội bộ hoặc VPN. & Không tin tưởng mặc định (\textit{Zero Implicit Trust}), "Never Trust, Always Verify". \\ \hline
+\textbf{Trọng tâm Bảo vệ} & Bảo vệ chu vi mạng vật lý, phân vùng IP tĩnh (VLAN, Subnet). & Bảo vệ trực tiếp tài sản dữ liệu, ứng dụng, định danh và thiết bị. \\ \hline
+\textbf{Cơ chế Phân quyền} & Cấp quyền tĩnh, diện rộng sau khi vượt qua tường lửa/VPN. & Cấp quyền tối thiểu (\textit{Least Privilege}), theo từng phiên (\textit{Per-session}) và ngữ cảnh. \\ \hline
+\textbf{Xác thực \& Ủy quyền} & Xác thực một lần duy nhất (\textit{One-time Authentication}) tại thời điểm đăng nhập. & Xác thực và ủy quyền liên tục (\textit{Continuous Evaluation}) trong suốt phiên kết nối. \\ \hline
+\textbf{Giám sát lưu lượng} & Kiểm soát lưu lượng biên (North-South); bỏ qua lưu lượng nội bộ (East-West). & Phân đoạn vi mô, mã hóa và kiểm tra 100\% luồng lưu lượng (North-South \& East-West). \\ \hline
+\textbf{Khả năng ẩn hạ tầng} & Các cổng dịch vụ hé lộ công khai trên Internet, dễ bị quét port. & Ẩn hoàn toàn tài nguyên khỏi mạng công cộng nhờ SPA/SDP ("Dark Cloud"). \\ \hline
+\textbf{Bán kính Thiệt hại (\textit{Blast Radius})} & Rộng. Khi bị xâm nhập 1 node, kẻ tấn công dễ dàng di chuyển sang ngang. & Hẹp. Vi chu vi và cô lập tức thì giúp khoanh vùng thiết bị bị thỏa hiệp. \\ \hline
+\end{tabular}
+\end{table}
+
+% ==========================================
+% SECTION 2.5
+% ==========================================
+\section{Các Thách thức Kỹ thuật và Vận hành khi Triển khai ZTA}
+\label{sec:2_5}
+
+Mặc dù mang lại hiệu quả vượt trội trong việc bảo vệ hệ thống trước các mối đe dọa hiện đại, quá trình dịch chuyển sang Kiến trúc Zero Trust đặt ra những thách thức lớn đối với doanh nghiệp:
+
+\begin{enumerate}
+    \item \textbf{Tương thích với hệ thống cũ (\textit{Legacy Systems}):} Các ứng dụng cổ điển (\textit{Legacy applications}) hoặc thiết bị công nghiệp (OT/IoT) không hỗ trợ giao thức mTLS, không tích hợp được với các hệ thống IdP hiện đại (OAuth2/OIDC/SAML) hoặc không cho phép cài đặt các Agent EDR/MDM.
+    \item \textbf{Độ trễ và hiệu năng hệ thống (\textit{Performance Overhead}):} Việc kiểm tra ngữ cảnh liên tục, giải mã/mã hóa dữ liệu tại các PEP và tính toán điểm tin cậy thời gian thực trên Trust Engine có thể gia tăng độ trễ kết nối (\textit{Latency}), ảnh hưởng đến trải nghiệm người dùng nếu hạ tầng không được tối ưu hóa.
+    \item \textbf{Độ phức tạp trong quản trị chính sách (\textit{Policy Complexity}):} Việc chuyển sang mô hình kiểm soát truy cập dựa trên thuộc tính (\textit{ABAC}) đòi hỏi định nghĩa hàng nghìn quy tắc động. Cấu hình sai chính sách tại Động cơ chính sách (PE) có thể dẫn đến việc từ chối dịch vụ nhầm đối với người dùng hợp lệ hoặc tạo ra các kẽ hở an ninh không mong muốn.
+    \item \textbf{Chi phí đầu tư và thay đổi văn hóa tổ chức:} Chuyển đổi ZTA là một quá trình dài hạn, đòi hỏi ngân sách đầu tư lớn cho các giải pháp phần mềm/hạ tầng mới (FIDO2, EDR, SIEM/SOAR) và thay đổi toàn bộ thói quen làm việc của nhân viên cũng như đội ngũ vận hành CNTT.
+\end{enumerate}
